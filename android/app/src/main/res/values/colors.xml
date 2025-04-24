@@ -1,0 +1,6 @@
+<resources>
+    <!-- Define the white color -->
+    <color name="white">#FFFFFF</color>
+      <color name="blue">#285FE7</color>
+    
+</resources>
