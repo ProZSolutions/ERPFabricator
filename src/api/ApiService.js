@@ -4,7 +4,7 @@ import { getValue } from '../component/AsyncStorage/AsyncStorage';
 
  
 const api = axios.create({
-    baseURL: 'https://erphrmsts.proz.in/api',
+    baseURL: 'https://erpbackendtesting.proz.in/api',
     timeout: 100000,
     headers: {
         'Content-Type': 'application/json',

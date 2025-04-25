@@ -9,18 +9,31 @@ function SearchInputBox({
     value = '',
 }) {
     return (
-        <View className="px-4" style={{marginTop:-20}}>
-            <View className={`flex-row items-center border-b border-gray-300 px-2 ${containerClass}`}>
-                <TextInput
-                    className="flex-1 text-lg text-custom-black"
-                    value={value}
-                    onChangeText={onChangeText}
-                    placeholder={placeholder}
-                    placeholderTextColor="#9B9B9B"  
-                />
-                <SearchIcon/>
-            </View>
+        <View className="px-4" style={{ marginTop: -10 }}>
+        <View
+          className="flex-row items-center px-2"
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 0, // sharp corners
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 }, // shadow only at bottom
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 3, // Android shadow, mostly at bottom
+          }}
+        >
+          <TextInput
+            className="flex-1 text-sm text-custom-black py-2"
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor="#9B9B9B"
+          />
+          <SearchIcon />
         </View>
+      </View>
+      
+      
     );
 }
 

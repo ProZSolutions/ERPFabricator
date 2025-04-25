@@ -52,7 +52,7 @@ const CustomHeader = ({
                                 <LeftArrowIcon />
                             </TouchableOpacity>
                         )}
-                        <Text className="text-white text-2xl font-bold">{name}</Text>
+                        <Text className="text-white text-lg font-bold">{name}</Text>
                     </View>
                     <View>
                         {isLogout && <TouchableOpacity onPress={logoutHandler}><LogoutIcon /></TouchableOpacity>}

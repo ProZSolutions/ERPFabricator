@@ -1,16 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, Platform ,Image,ActivityIndicator} from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, Platform ,Image,ActivityIndicator,FlatList} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
 import { PermissionsAndroid } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getValue, removeValue } from "../../component/AsyncStorage/AsyncStorage";
+import CustomFooter from '../../component/Footer/CustomFooter';
 
 
 import CustomHeader from '../../component/Header/CustomHeader';
 import Container from '../../component/Container/Container';
 import { styled } from 'nativewind';
+import AttendanceRow from '../MembersList/AttendanceRow';
+
+import moment from 'moment';
+
+
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -28,7 +34,10 @@ function MembersList() {
   const [deviceid,setDeviceID]=useState(null);
   const [token,setToken] = useState(null);
   const [punchStatus, setPunchStatus] = useState(0); // default 0 (not punched in)
+  const [showTracking, setShowTracking] = useState(false);
 
+
+  const [attendanceData, setAttendanceData] = useState([]);
 
 
   const tabs = [
@@ -303,7 +312,7 @@ function MembersList() {
   const getDeviceId = async () => {
     try {
       const device_id = await AsyncStorage.getItem('device_id');
-      const userInfo = await getValue('userInfo'); // 👈 get token from storage
+      const userInfo = await getValue('userInfohrms'); // 👈 get token from storage
       const bearerToken = userInfo?.bearer_token; 
       setToken( bearerToken);
       setDeviceID(device_id);
@@ -313,50 +322,120 @@ function MembersList() {
       return null;
     }
   };
+  const fetchAttendanceData = async () => {
+    let token_no = "Bearer " + token;
+    setLoading(true);
+  
+    try {
+      const response = await fetch('https://erphrmsts.proz.in/api/atten-list', {
+        method: 'POST', // or 'GET' based on your API config
+        headers: {
+          'Authorization': token_no,
+          'device_id': deviceid,
+          'Accept': 'application/json',
+        },
+      });
+  
+      const data = await response.json();
+      console.log('Attendance List Response:', data);
+  
+      if (response.status === 200 && data.status === 'success') {
+        const list = data.data;  
+  
+        const transformedData = list.in_time.map((inTime, index) => ({
+          in_time: inTime,
+          out_time: list.out_time[index] || '-',
+          work_hours: list.work_hours[index] || '-',
+          pin_work_location: list.pin_work_location[index] || '-',
+          pout_work_location: list.pout_work_location[index] || '-',
+        }));
+  
+        setAttendanceData(transformedData);
+      } else {
+        console.warn('Attendance list fetch failed:', data.message);
+       }
+  
+    } catch (error) {
+      console.log('Error fetching attendance list:', error);
+     } finally {
+      setLoading(false);
+    }
+  };
+  
 
   useEffect(() => {
     const handler = setTimeout(() => {
       getCurrentLocation();
       getDeviceId();
- 
     }, 300);
 
     return () => {
       clearTimeout(handler);
     };
   }, []);
+  useEffect(() => {
+    if (token && deviceid) {
+      fetchAttendanceData();
+    }
+  }, [token, deviceid]);
 
   
  
   return (
     <View className="flex-1 bg-white">
       <CustomHeader name="Attendance" isBackIcon={true} />
-      <StyledView className="px-4">
-         <StyledView>
-          <Text className="text-custom-companytxt text-xs font-normal mt-2">
-            Your current location: {latitude} , {longitude}
-          </Text>
+      <StyledView className="px-4 items-end">
+
+
+      {attendanceData && attendanceData.length > 0 && (
+        <>
+         <StyledView className='mb-[10px]'>
+         <TouchableOpacity onPress={() => setShowTracking(!showTracking)}>
+            <Text className="text-black underline text-custom-companytxt text-[12px] font-normal mt-2 text-right" >
+            {showTracking ? 'Hide Tracking' : 'Show Tracking'}
+            </Text>
+          </TouchableOpacity>
+
         </StyledView>
+        {showTracking && (
+        <StyledView className='flex-row'>
+        <FlatList
+            data={attendanceData}
+            renderItem={({ item,index }) => <AttendanceRow item={item} index={index}  />}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </StyledView>
+      )}
+      </>
+      )}
+
 
         <StyledView className="flex-row">
-          {tabs.map((tab) => (
-            <StyledTouchableOpacity
-              key={tab.id}
-              onPress={() => setActiveTab(tab.id)}
-              className={`flex-1 items-center py-3 ${
-                activeTab === tab.id ? 'bg-blue-500' : 'bg-gray-200'
-              }`}
-            >
-              <StyledText
-                className={`text-lg font-semibold ${
-                  activeTab === tab.id ? 'text-white' : 'text-gray-500'
-                }`}
-              >
-                {tab.label}
-              </StyledText>
-            </StyledTouchableOpacity>
-          ))}
+            {tabs.map((tab, index) => (
+              <React.Fragment key={tab.id}>
+                <StyledTouchableOpacity
+                  onPress={() => setActiveTab(tab.id)}
+                  className={`flex-1 items-center py-3 ${
+                    activeTab === tab.id ? 'bg-blue-500' : 'bg-gray-200'
+                  }`}
+                >
+                  <StyledText
+                    className={`text-sm font-semibold ${
+                      activeTab === tab.id ? 'text-white' : 'text-gray-500'
+                    }`}
+                  >
+                    {tab.label}
+                  </StyledText>
+                </StyledTouchableOpacity>
+
+                {index < tabs.length - 1 && (
+                  <StyledView className="w-[1px] bg-gray-100" />
+                )}
+              </React.Fragment>
+            ))}
         </StyledView>
+
+
 
        
         {uri == null ? (
@@ -377,15 +456,15 @@ function MembersList() {
                
 
                <StyledView className="flex-row justify-center items-center space-x-4 mt-4">
-  <StyledTouchableOpacity 
-    className="flex-1 items-center py-3 bg-blue-500 rounded-lg" 
-    onPress={takePicture}
-  >
-    <StyledText className="text-lg font-semibold text-white">
-      Capture Image
-    </StyledText>
-  </StyledTouchableOpacity>
-</StyledView>
+                  <StyledTouchableOpacity 
+                    className="flex-1 items-center py-3 bg-blue-500 rounded-lg" 
+                    onPress={takePicture}
+                  >
+                    <StyledText className="text-sm font-semibold text-white">
+                      Capture Image
+                    </StyledText>
+                  </StyledTouchableOpacity>
+                </StyledView>
 
 
               </>
@@ -393,17 +472,19 @@ function MembersList() {
 
               ) : (
                 <>
-                <StyledView className="flex items-center justify-center mt-4">
-                  <Image
-                    source={{ uri: uri }}
-                    style={{ width: 200, height: 200, borderRadius: 10 }}
-                    resizeMode="cover"
-                  />
-             </StyledView>
+                <StyledView className="flex items-center justify-center mt-4 w-full">
+  <Image
+    source={{ uri: uri }}
+    style={{ width: 200, height: 200, borderRadius: 10 }}
+    resizeMode="cover"
+  />
+</StyledView>
+
              {loading && (
-              <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/30 z-50">
-                    <ActivityIndicator size="large" color="#ffffff" />
+              <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center z-10 ">
+                    <ActivityIndicator size="large" color="#335ec7" />
               </View>
+
                   )
               }
                 <StyledView className="flex-row justify-center items-center space-x-4 mt-4">
@@ -411,7 +492,7 @@ function MembersList() {
                    rounded-lg`} 
                    disabled={punchStatus === 1}   // 👈 Disable if punchStatus is 1
                    onPress={handleCheckIn}>
-                        <StyledText className={`text-lg font-semibold text-white`} >
+                        <StyledText className={`text-sm font-semibold text-white`} >
                           Check In
                         </StyledText>
                   </StyledTouchableOpacity>
@@ -420,7 +501,7 @@ function MembersList() {
                   ${punchStatus === 0 ? 'bg-gray-400' : 'bg-blue-500'} rounded-lg`} 
                   disabled={punchStatus === 0}   // 👈 Disable if punchStatus is 1
                   onPress={handleCheckOut}>
-                        <StyledText className={`text-lg font-semibold text-white`} >
+                        <StyledText className={`text-sm font-semibold text-white`} >
                           Check Out
                         </StyledText>
                   </StyledTouchableOpacity>
@@ -431,6 +512,7 @@ function MembersList() {
 
                
      </StyledView>
+     <CustomFooter  />
      </View>
   );
 }

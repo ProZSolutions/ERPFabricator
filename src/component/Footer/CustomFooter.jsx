@@ -3,7 +3,9 @@ import SelectedHomeIcon from "../../assets/svg-component/FooterSelectedHomeIcon"
 import FooterAddChitIcon from "../../assets/svg-component/FooterAddChitIcon";
 import FooterChitCalcIcon from "../../assets/svg-component/FooterChitCalcIcon";
 import FooterSettingIcon from "../../assets/svg-component/FooterSettingIcon";
+import ListIcon from "../../assets/svg-component/ListIcon";
 import { useNavigation } from "@react-navigation/native";
+
 import { useEffect, useState } from "react";
 import { getValue } from "../AsyncStorage/AsyncStorage";
 import AddChitPopup from "../ModalPopup/AddChitPopup";
@@ -23,9 +25,7 @@ function CustomFooter({
     isAddMember = false,
     gotoAddMember = () => { }
 }) {
-    const navigation = useNavigation();
-    const [userInfoData, setUserInfoData] = useState(null);
-    const [isAddChitModal, setIsAddChitModal] = useState(false);
+    const navigation = useNavigation(); 
 
     useEffect(() => {
         const userInfoHandler = async () => {
@@ -35,17 +35,7 @@ function CustomFooter({
         userInfoHandler()
     }, [])
 
-    const addChitHandler = () => {
-        setIsAddChitModal(true);
-    }
-    const onPressChitType = (type) => {
-        setIsAddChitModal(false);
-        if(type === 'new'){
-            navigation.navigate("AddChit", {isExistingChit:false});
-        } else {
-            navigation.navigate("AddChit", {isExistingChit:true});
-        }
-    }
+     
 
     return (
         <View className="flex-row justify-around items-center p-2 py-2 bg-white absolute bottom-0 w-full border-t border-gray-100">
@@ -55,55 +45,26 @@ function CustomFooter({
                 textClass="text-custom-footerselected text-sm font-semibold"
                 onPress={() => navigation.navigate("Home")}
             />
-            {isAddCollection ? (
-                <FooterButton
-                    icon={FooterAddChitIcon}
-                    label="Add Collections"
-                    textClass="text-custom-companytxt text-sm font-medium"
-                    onPress={() => navigation.navigate("AddCollection", { chitId, auctionMonth })}
-                />
-            ) : isAddSettlement ? (
-                <FooterButton
-                    icon={FooterAddChitIcon}
-                    label="Add Settlement"
-                    textClass="text-custom-companytxt text-sm font-medium"
-                    onPress={() => navigation.navigate("AddSettlement", { chitId, auctionMonth })}
-                />
-            ) : isAddMember ? (
-                <FooterButton
-                    icon={FooterAddChitIcon}
-                    label="Add Member"
-                    textClass="text-custom-companytxt text-sm font-medium"
-                    onPress={() => gotoAddMember()}
-                />
-            ) : userInfoData?.role_name === 'agent' ? (
-                <FooterButton
-                    icon={FooterAddChitIcon}
-                    label="Add Chit"
-                    textClass="text-custom-companytxt text-sm font-medium"
-                    onPress={addChitHandler}
-                />
-            ) : (null)}
-
+             
             <FooterButton
-                icon={FooterChitCalcIcon}
-                label="Chit Calc"
+                icon={FooterSettingIcon}
+                label="Tasks"
                 textClass="text-custom-companytxt text-sm font-medium"
-                onPress={() => navigation.navigate("ChitCalculation")}
+                onPress={() => navigation.navigate("Home")}
             />
             <FooterButton
                 icon={FooterSettingIcon}
-                label="Settings"
+                label="Calls"
                 textClass="text-custom-companytxt text-sm font-medium"
-                onPress={() => navigation.navigate("Settings")}
+                onPress={() => navigation.navigate("Home")}
             />
 
-            {isAddChitModal && (
-                <AddChitPopup
-                    close={() => setIsAddChitModal(false)}
-                    onPressChitType = {onPressChitType}
-                />
-            )}
+            <FooterButton
+                icon={FooterSettingIcon}
+                label="Leads"
+                textClass="text-custom-companytxt text-sm font-medium"
+                onPress={() => navigation.navigate("Home")}
+            />
 
 
         </View>

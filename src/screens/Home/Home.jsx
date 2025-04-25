@@ -25,6 +25,7 @@ import { AuthContext } from "../../component/AuthContext/AuthContext";
 import handleError from "../../component/ErrorHandler/ErrorHandler";
 import { capitalizeFirstLetter } from "../../utils";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import TaskList from "../Tasks/TaskList";
 
 //import Pusher from 'pusher-js/react-native';
 // import echo from "../../websocket";
@@ -112,7 +113,7 @@ const Home = () => {
     3: "PendingList",
     4: "TransactionList",
     5: "MembersList",
-    6: "PorfitLoss",
+    6: "TaskList",
     7: "PorfitLoss",
   };
 
@@ -223,6 +224,8 @@ const Home = () => {
          
         </View>
       </Container>
+      <CustomFooter  />
+
      </View>
   );
 };

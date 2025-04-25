@@ -31,14 +31,15 @@ import AddCollection from '../AddCollection/AddCollection';
 import AddSettlement from '../AddSettlement/AddSettlement';
 import AuctionReqList from '../AuctionReqList/AuctionReqList';
 import SettlementDetails from '../TransactionList/SettlementDetails';
-import MemberChitList from '../MembersList/MemberChitList/MemberChitList';
-import MemberPaymentDetails from '../MembersList/MemberPaymentDetails/MemberPaymentDetails';
 import MyAuctionReqForm from '../MyAuction/MyAuctionReqForm';
 import MyAuctionDetails from '../MyAuction/MyAuctionDetails';
 import MyAuctionSummary from '../MyAuction/MyAuctionSummary';
 import PorfitLoss from '../PorfitLoss/PorfitLoss';
 import ExistingAddChit from '../ExistingChit/ExistingAddChit';
 import ExistingChitSummary from '../ExistingChit/ExistingChitSummary';
+import TaskList from '../Tasks/TaskList';
+import UpdateTask from '../Tasks/UpdateTask';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +47,8 @@ function Navigations() {
     const { isLoggedIn } = useContext(AuthContext);
     console.log("is logged in ",isLoggedIn);
     return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+
         <NavigationContainer>
             <Stack.Navigator
                 initialRouteName={isLoggedIn ? 'Home' : 'Login'}
@@ -55,6 +58,8 @@ function Navigations() {
                     <>
                          <Stack.Screen name="Home" component={Home} />
                         <Stack.Screen name="UpcomingAuction" component={UpcomingAuction} />
+                        <Stack.Screen name="TaskList" component={TaskList} />
+                        <Stack.Screen name='UpdateTask' component={UpdateTask} />
                         <Stack.Screen name="MembersList" component={MembersList} />
                         <Stack.Screen name="AddMembers" component={AddMembers} />
                         <Stack.Screen name="AddChit" component={AddChit} />
@@ -80,9 +85,7 @@ function Navigations() {
                         <Stack.Screen name="AddSettlement" component={AddSettlement} />
                         <Stack.Screen name="AuctionReqList" component={AuctionReqList} />
                         <Stack.Screen name="SettlementDetails" component={SettlementDetails} /> 
-                        <Stack.Screen name="MemberChitList" component={MemberChitList} />
-                        <Stack.Screen name="MemberPaymentDetails" component={MemberPaymentDetails} />
-                        <Stack.Screen name="MyAuctionReqForm" component={MyAuctionReqForm} />
+                         <Stack.Screen name="MyAuctionReqForm" component={MyAuctionReqForm} />
                         <Stack.Screen name="MyAuctionDetails" component={MyAuctionDetails} />
                         <Stack.Screen name="MyAuctionSummary" component={MyAuctionSummary} />
                         <Stack.Screen name="PorfitLoss" component={PorfitLoss} />
@@ -99,6 +102,7 @@ function Navigations() {
                 )}
             </Stack.Navigator>
         </NavigationContainer>
+        </GestureHandlerRootView>
     );
 }
 

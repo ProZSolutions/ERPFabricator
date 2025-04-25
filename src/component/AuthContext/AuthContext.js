@@ -23,7 +23,10 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
      checkLoginStatus();
   };
-
+  const setUserInfoHRMS = async (userInfo) => {
+    await AsyncStorage.setItem("userInfohrms", JSON.stringify(userInfo));
+     checkLoginStatus();
+  };
   const logout = async () => {
     await AsyncStorage.clear();
     setIsLoggedIn(false);
@@ -35,7 +38,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, setIsLoggedIn, setUserInfo, logout }}
+      value={{ isLoggedIn, setIsLoggedIn, setUserInfo, logout,setUserInfoHRMS }}
     >
       {children}
     </AuthContext.Provider>
