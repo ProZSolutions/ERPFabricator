@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, Text, StyleSheet, TouchableWithoutFeedback, Alert } from "react-native";
+import { View, TextInput, Text, StyleSheet, TouchableWithoutFeedback, Alert,TouchableOpacity } from "react-native";
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 const ImageUploadTextBox = ({
@@ -67,7 +67,7 @@ const ImageUploadTextBox = ({
             ) : null}
 
             <TouchableWithoutFeedback onPress={handlePress}>
-                <View className={`flex-row items-center border border-gray-200 px-2 rounded-lg ${containerClass}`}>
+                <View className={`flex-row items-center border border-gray-200  rounded-lg ${containerClass}`}>
                     {leftIcon && icon && <View className="mr-2">{icon}</View>}
                     <View className="flex-1 flex-row items-center">
                         {required && !isFocused && !value ? (
@@ -75,8 +75,11 @@ const ImageUploadTextBox = ({
                                 {placeholder}
                             </Text>
                         ) : null}
+                        <TouchableOpacity className="bg-blue-600 px-5 py-3 rounded-l-md">
+                            <Text className="text-white font-semibold text-sm">Choose File</Text>
+                        </TouchableOpacity>
                         <TextInput
-                            className="flex-1 text-lg"
+                            className="flex-1 text-lg ml-2"
                             editable={editable}
                             value={value}
                             onFocus={() => setIsFocused(true)}

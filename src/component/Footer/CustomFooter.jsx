@@ -9,6 +9,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { getValue } from "../AsyncStorage/AsyncStorage";
 import AddChitPopup from "../ModalPopup/AddChitPopup";
+import Feather from 'react-native-vector-icons/Feather';
+
 
 const FooterButton = ({ icon: IconComponent, label, textClass, onPress }) => (
     <TouchableOpacity className="flex items-center justify-center" onPress={onPress}>
@@ -56,7 +58,7 @@ function CustomFooter({
                 icon={FooterSettingIcon}
                 label="Calls"
                 textClass="text-custom-companytxt text-sm font-medium"
-                onPress={() => navigation.navigate("Home")}
+                onPress={() => navigation.navigate("CallHIstory")}
             />
 
             <FooterButton

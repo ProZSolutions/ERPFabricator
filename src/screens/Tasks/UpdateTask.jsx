@@ -1,148 +1,252 @@
-import { View, Text, TouchableOpacity, Alert } from "react-native";
-import CheckBox from '@react-native-community/checkbox';
-import { useContext, useState } from "react";
-import TextInputBox from "../../component/TextInputBox/TextInputBox";
-import PasswordInputBox from "../../component/PasswordInputBox/PasswordInputBox";
-import CustomButton from "../../component/Button/CustomButton";
-import PhoneIcon from "../../assets/svg-component/PhoneIcon";
-import PasswordLockIcon from "../../assets/svg-component/PasswordLockIcon";
-import LoginButtonArrowIcon from "../../assets/svg-component/LoginButtonArrowIcon";
-import { useNavigation } from "@react-navigation/native";
-import { postData } from "../../api/ApiService";
-import Spinner from "../../component/Spinner/Spinner";
-import { AuthContext } from "../../component/AuthContext/AuthContext";
- import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { Alert, Pressable, Text, View,TouchableOpacity } from 'react-native';
+import CustomHeader from '../../component/Header/CustomHeader';
+import Container from '../../component/Container/Container';
+import CustomFooter from '../../component/Footer/CustomFooter';
+import DropdownPickerBox from '../../component/DropdownBox/DropdownPickerBox';
+import TextInputBox from '../../component/TextInputBox/TextInputBox';
+import CustomDatePicker from '../../component/DatePicker/CustomDatePicker';
+import RightArrowIcon from '../../assets/svg-component/RightArrowIcon';
+import CustomButton from '../../component/Button/CustomButton';
+import { getData, postData } from '../../api/ApiService';
+import { capitalizeFirstLetter } from '../../utils';
+import handleError from '../../component/ErrorHandler/ErrorHandler';
+import Spinner from '../../component/Spinner/Spinner';
+import UploadIcon from '../../assets/svg-component/UploadIcon';
+import ImageUploadTextBox from '../../component/ImageUploadTextBox/ImageUploadTextBox';
+import CommentsInputBox from '../../component/CommentsInputBox/CommentsInputBox';
+import { useNavigation } from '@react-navigation/native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { BASE_URL_TESTING } from '../../api/Config';
 
-function SignInForm() {
-  const [isChecked, setChecked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [usernameError, setUsernameError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const navigation = useNavigation();
-  const { setUserInfo } = useContext(AuthContext);
-  const validateInputs = () => {
-    let isValid = true;
-    setUsernameError("");
-    setPasswordError("");
+import moment from 'moment';
 
-   
+function AddSettlement({ route }) {
+    const [mode,setMode]=useState(false);
+    
+    const { details } = route.params || {};
+    const [loading, setLoading] = useState(false);
+    const navigation = useNavigation();
 
-    if (!username) {
-      setUsernameError("Username is required");
-      isValid = false;
-    } 
+    const [formValues, setFormValues] = useState({
+        uuid: null,
+        update_status: null,
+        date: null,
+        details: '',
+        file_url: ''
+       
+    });
 
-    if (!password) {
-      setPasswordError("Password is required");
-      isValid = false;
-    }
+    const [errors, setErrors] = useState({});
+    const [options, setOptions] = useState({
+        update_status: [
+            { label: "Pending", value: "pending" },
+            { label: "Completed", value: "completed" }
+        ]
+    });
 
-    return isValid;
-  };
+    useEffect(() => {
+      if (details) {
+        console.log("details",details+" date value as "+details.date);
 
-  function generateRandomString(length = 4) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
-  const loginHandler = async () => {
-    if (!validateInputs()) {
-      return;
-    }
-     let device_id = generateRandomString; 
-
-    if(username=='AV-001'){
-      device_id="axxx";
-    }else if(username=='AV-02'){
-      device_id="sdgs";
-    }
-
-    console.log("randomDevice",device_id);
+          setFormValues((prev) => ({
+              ...prev,
+              uuid: details.uuid || null,
+              update_status: details.is_completed === 1 ? 'pending' : 'completed',
+              date: details.date ? moment(details.date).format("DD/MM/YYYY") : null,
+              details: details.latest_update || '',
+              file_url: details.file_url || '',
 
 
-    try {
-      setIsLoading(true);
-      const payload = { username, password,device_id };
+          }));
+      }
+  }, [details]);
+  
+ 
+    const handleValueChange = (name, value) => {
+        if (name === "file_url") {
+            setFormValues((prevState) => ({
+                ...prevState,
+                file_url: value.name,
+                file_url: value.base64,
+            }));
+        } else {
+            setFormValues((prev) => ({ ...prev, [name]: value }));
 
-      const response = await postData('/login', payload);
-      if (response && response.status === 'success') {
-        console.log("Login API Response:", response); // 👈 Debug line
-        await setUserInfo(response);
-        navigation.navigate('Home');
+        }
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: '' }));
+        }
+ 
+        if (name === 'update_status') {
+                    // Reset dependent fields
+                    setFormValues((prev) => ({
+                        ...prev,
+                        update_status: value
+                    }));                
+       }
+ 
 
-        try {
-          await AsyncStorage.setItem('device_id', device_id);
-          console.log('Device ID saved:', device_id);
-        } catch (error) {
-          console.error('Error saving device ID:', error);
+    };
+
+    const getPlaceholderText = (key, defaultText) => options[key].find((item) => item.value === formValues[key])?.label || defaultText;
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formValues.date) newErrors.date = 'Please select date.';
+        if (!formValues.update_status) newErrors.update_status = 'Please select status.';
+        if (!formValues.details) newErrors.details = 'Please enter description.';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async () => {
+        if (!validateForm()) {
+            console.log('Validation errors:', errors);
+            return;
         }
 
-      } else {
-        Alert.alert("Login failed", response?.message || "Unknown error");
-      }
-    } catch (error) {
-      if (error?.response?.data?.status === "error") {
-        Alert.alert(
-          "Error",
-          error?.response?.data?.error || "An error occurred."
-        );
-      } else {
-        await handleError(error, false);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
+        setLoading(true);
+        try {
+            const requestPayload = {
+                uuid:details.uuid,
+                file_url: formValues.file_url,
+                update_status: formValues.update_status,
+                details: formValues.details,
+                 date: moment(new Date(formValues.date)).format("YYYY-MM-DD"),
+                
 
-  return (
-    <View className="flex-1 justify-center items-center bg-white">
+            };
+            const response = await postData('/crm/crmtaskupdate-create', requestPayload);
+            console.log("API Response:", response);
 
-    <View className="w-80  px-3">
+            if (response.status === "success") {
+                Alert.alert(
+                    "Success",
+                    "Task Details Submitted Successfully!!!.",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => {
+                                  navigation.goBack()
+                            },
+                        },
+                    ],
+                    { cancelable: false }
+                );
+            }
+        } catch (error) {
+            if (error?.response?.data?.status === "error") {
+                Alert.alert(
+                    "Error",
+                    error?.response?.data?.error || "An error occurred."
+                );
+            } else {
+                await handleError(error, false);
+            }
+        } finally {
+            setLoading(false);
+        }
 
-      <Spinner visible={isLoading} textContent="Logging in..." />
+    };
 
-      <View className="mb-3">
-        <TextInputBox
-          icon={<PhoneIcon />}
-          required={true}
-          placeholder="Username"
-          value={username}
-          onChangeText={(text) => {
-       const filteredText = text
-        .toUpperCase() // convert to uppercase
-        .replace(/[^A-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, ''); // allow only A-Z, 0-9, symbols
-         setUsername(filteredText);
-    }}
-           errorMessage={usernameError}
-          editable={true}
-        />
+    useEffect(() => {
+        
+    }, [ ]);
 
-      </View>
-      <View>
-        <PasswordInputBox
-          onChangeText={setPassword}
-          value={password}
-          lockIcon={<PasswordLockIcon />}
-          errorMessage={passwordError}
-        />
-      </View>
+    return (
+        <View className="flex-1 bg-white">
+            <CustomHeader name="Task Details" isBackIcon />
+            <Container paddingBottom={110}>
+                <View style={{ marginTop: -15 }}>
+                    <Spinner visible={loading} textContent="Loading..." />
+ 
+                    <View style={{ flexDirection: 'row', alignItems: 'center',marginLeft:5 }}>
+                                <FontAwesome name="calendar" size={13} color="#000" style={{ marginRight: 6 }} />
+                                <Text style={{ color: '#000',fontSize:12 }}> Date</Text>
+                                <Text style={{color:'red',marginLeft:3}}>*</Text>
+                    </View>
+                    <CustomDatePicker
+                        date={formValues.date}
+                        onChangeTxt={(value) => handleValueChange("date", value)}
+                        placeholder="Select Date"
+                         required={true}
+                        editable={true}
+                        rightIcon={true}
+                        errorMessage={errors.date}
+                    />
+                    
+                    {[{ key: 'update_status', label: 'Status' }].map(({ key, label }) => (
+                        <View key={key} className="mb-4">
+                            <DropdownPickerBox
+                                 
+                                label={
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <FontAwesome name="spinner" size={13} color="#000" style={{ marginRight: 6 }} />
+                                        <Text style={{ fontSize: 12, color: '#000' }}>{label}</Text>
+                                        <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                                    </View>
+                                }
+                                options={options[key]}
+                                onValueChange={(value) => handleValueChange(key, value)}
+                                placeholder={getPlaceholderText(key, label)}
+                                value={formValues[key]}
+                                mb='mb-0'
+                            />
+                            {errors[key] && <Text className="text-red-500 font-normal text-[12px]">{errors[key]}</Text>}
+                        </View>
+                    ))}
 
-    
+                    <View style={{ flexDirection: 'row', alignItems: 'center',marginLeft:5 }}>
+                                <FontAwesome name="file-text" size={13} color="#000" style={{ marginRight: 6 }} />
+                                <Text style={{ color: '#000',fontSize:12 }}> Task Description </Text>
+                                <Text style={{color:'red',marginLeft:3}}>*</Text>
+                    </View>
+                    <TextInputBox
+                        required
+                        placeholder="Details"
+                         value={formValues.details}
+                        onChangeText={(text) => handleValueChange('details', text)}
+                        errorMessage={errors.details}
+                        multiline={true}
+                        numberOfLines={5}
+                        textAlignVertical="top"
+                    />
+                    
+                     
+                    <View>
+                        <ImageUploadTextBox
+                            icon={<UploadIcon />}
+                            leftIcon={false}
+                            rightIcon={true}
+                            required={false}
+                            editable={false}
+                            containerClass="bg-gray-200"
+                            placeholder="Attached Documents"
+                            label="Work Attachment File (if any)"
+                            value={formValues.file_url}
+                            onChangeText={(text) => handleValueChange('file_url', text)}
+                            errorMessage={errors.file_url}
+                            mb="mb-1"
+                        />
+                         
+                    </View>
+                     
 
-      <View className="w-1/2 mx-auto">
-        <CustomButton
-          icon={<LoginButtonArrowIcon />}
-          title="LOGIN"
-          onPress={loginHandler} />
-      </View>
-    </View>
-    </View>
-  );
+                    <View className="flex-row justify-between mt-4">
+                      <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md">
+                        <Text className="text-white font-semibold text-sm">Cancel</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
+                        <Text className="text-white font-semibold text-sm">Update</Text>
+                      </TouchableOpacity>
+                  </View>
+
+                </View>
+            </Container>
+            <CustomFooter  />
+            </View>
+    );
 }
-
-export default SignInForm;
+export default AddSettlement;

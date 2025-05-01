@@ -74,7 +74,7 @@ const CustomDatePicker = ({
           />
           {rightIcon && (
             <StyledView className="pl-3">
-              <DatePickerIcon />
+              <DatePickerIcon color="#000"/>
             </StyledView>
           )}
         </StyledTouchableOpacity>

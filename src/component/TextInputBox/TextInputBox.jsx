@@ -16,7 +16,9 @@ const TextInputBox = ({
     isCurrency = false,
     isPercentage = false,
     mb="mb-4",
-    keyboardType = "default"
+    keyboardType = "default",
+    multiline=false,
+    numberOfLines=1
 }) => {
     const [isFocused, setIsFocused] = useState(false);
 
@@ -44,14 +46,17 @@ const TextInputBox = ({
                         className="flex-1 text-lg"
                         editable={editable}
                         value={value}
+                        multiline={multiline}
+                        numberOfLines={numberOfLines}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
                         onChangeText={onChangeText}
                         keyboardType = {keyboardType}
+                        textAlignVertical={multiline ? 'top' : 'center'} // ensures text starts at top for multiline
                         style={{
                             color: "#142650",
                             fontSize: 12,
-                            height:50
+                            ...(multiline ? { minHeight: numberOfLines * 20 } : { height: 50 }),
                         }}
                     />
                     {isPercentage && (value || isFocused) && (
