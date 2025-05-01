@@ -28,6 +28,8 @@ function AddSettlement({ route }) {
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
+    const shouldShowForm = details?.is_update === 1 && details?.is_completed === 0;
+
     const [formValues, setFormValues] = useState({
         uuid: null,
         update_status: null,
@@ -53,7 +55,7 @@ function AddSettlement({ route }) {
               ...prev,
               uuid: details.uuid || null,
               update_status: details.is_completed === 1 ? 'pending' : 'completed',
-              date: details.date ? moment(details.date).format("DD/MM/YYYY") : null,
+              date: details.date ? new Date(details.date) : new Date(),
               details: details.latest_update || '',
               file_url: details.file_url || '',
 
@@ -113,8 +115,8 @@ function AddSettlement({ route }) {
                 file_url: formValues.file_url,
                 update_status: formValues.update_status,
                 details: formValues.details,
-                 date: moment(new Date(formValues.date)).format("YYYY-MM-DD"),
-                
+                date: moment(formValues.date ? new Date(formValues.date) : new Date()).format("YYYY-MM-DD"),
+
 
             };
             const response = await postData('/crm/crmtaskupdate-create', requestPayload);
@@ -158,6 +160,7 @@ function AddSettlement({ route }) {
         <View className="flex-1 bg-white">
             <CustomHeader name="Task Details" isBackIcon />
             <Container paddingBottom={110}>
+            {shouldShowForm ? (
                 <View style={{ marginTop: -15 }}>
                     <Spinner visible={loading} textContent="Loading..." />
  
@@ -234,7 +237,7 @@ function AddSettlement({ route }) {
                      
 
                     <View className="flex-row justify-between mt-4">
-                      <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md">
+                      <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md"   onPress={() => navigation.navigate('TaskList')}>
                         <Text className="text-white font-semibold text-sm">Cancel</Text>
                       </TouchableOpacity>
 
@@ -244,6 +247,13 @@ function AddSettlement({ route }) {
                   </View>
 
                 </View>
+            ) : (
+                <View className="flex-1 justify-center items-center mt-10">
+                    <Text className="text-gray-500 text-base text-center">
+                    This task is already completed or cannot be updated.
+                    </Text>
+                </View>
+             )}
             </Container>
             <CustomFooter  />
             </View>

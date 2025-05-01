@@ -39,6 +39,7 @@ import ExistingAddChit from '../ExistingChit/ExistingAddChit';
 import ExistingChitSummary from '../ExistingChit/ExistingChitSummary';
 import TaskList from '../Tasks/TaskList';
 import UpdateTask from '../Tasks/UpdateTask';
+import UpdateSchedule from '../Tasks/UpdateSchedule';
 import CallHIstory from '../CallTracking/CallHistory';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -63,6 +64,7 @@ function Navigations() {
                         <Stack.Screen name="TaskList" component={TaskList} />
                         <Stack.Screen name="CallHIstory" component={CallHIstory} />
                         <Stack.Screen name='UpdateTask' component={UpdateTask} />
+                        <Stack.Screen name='UpdateSchedule' component={UpdateSchedule} />
                         <Stack.Screen name="MembersList" component={MembersList} />
                         <Stack.Screen name="AddMembers" component={AddMembers} />
                         <Stack.Screen name="AddChit" component={AddChit} />

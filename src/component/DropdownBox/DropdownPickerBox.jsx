@@ -50,13 +50,13 @@ function DropdownPickerBox({
                         borderRadius: 5
                     }}
                 >
-                    <Text className="text-custom-black text-xs">{placeholder}</Text>
+                    <Text className="text-custom-black text-xs"> {options.find((opt) => opt.value === value)?.label || placeholder}</Text>
                     <View className="absolute right-3 top-3 -translate-y-1/2">
                         <DownArrowIcon />
                     </View>
                     <Picker
                         ref={pickerRef}
-                        selectedValue={1}
+                        selectedValue={value}
                         onValueChange={onValueChange}
                         useNativeAndroidPickerStyle={false}
                         enabled={!disabled}

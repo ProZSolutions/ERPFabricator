@@ -61,7 +61,7 @@ const getTaskList = async (page = 1, searchTerm = '') => {
   setLoading(true);
 
   try {
-    let url = `${BASE_URL_TESTING}mobile/calltracking-list?page=${page}`;
+    let url = `${BASE_URL_TESTING}calltracking-list?page=${page}`;
     if (searchTerm) {
       url += `&call_type=${encodeURIComponent(searchTerm)}`;
     }

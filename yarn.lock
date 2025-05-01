@@ -2079,6 +2079,11 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
+"@types/geojson@^7946.0.13":
+  version "7946.0.16"
+  resolved "https://registry.npmjs.org/@types/geojson/-/geojson-7946.0.16.tgz"
+  integrity sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==
+
 "@types/graceful-fs@^4.1.3":
   version "4.1.9"
   resolved "https://registry.npmjs.org/@types/graceful-fs/-/graceful-fs-4.1.9.tgz"
@@ -6669,6 +6674,13 @@ react-native-make@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/react-native-make/-/react-native-make-1.0.1.tgz"
   integrity sha512-+Wo2JSp6NyeKleH9aZcdPsW7X8KiBOZkwx6L65UkPCDbk4FlcYd4yw+YIuK0SUVFkUaFHTU1n8LjIjFpT+YICA==
+
+react-native-maps@^1.22.6:
+  version "1.22.6"
+  resolved "https://registry.npmjs.org/react-native-maps/-/react-native-maps-1.22.6.tgz"
+  integrity sha512-4aYR+wvxFpYAisSHUtUACt7pVmemdZb/06WUfCjltS1Ag6056EmWxgQd9zwujGpEZf+3j1/O/sWgGAPk6xXy2Q==
+  dependencies:
+    "@types/geojson" "^7946.0.13"
 
 react-native-modal@^13.0.1:
   version "13.0.1"
