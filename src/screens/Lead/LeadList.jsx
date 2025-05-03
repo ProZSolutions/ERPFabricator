@@ -7,11 +7,12 @@ import { RNCamera } from 'react-native-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getValue, removeValue } from "../../component/AsyncStorage/AsyncStorage";
 import CustomFooter from '../../component/Footer/CustomFooter';
-import SearchInputBox from '../../component/SearchDisable/SearchDisable';
-import TaskItemRow from '../../screens/Tasks/TaskItemRow';
+import SearchInputBox from '../../component/SearchInputBox/SearchInputBox';
+import LeadRowItem from '../../screens/Lead/LeadRowItem';
 import { BASE_URL_TESTING } from '../../api/Config';
-import SearchModal from './SearchModal';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+ 
 import CustomHeader from '../../component/Header/CustomHeader';
  import { styled } from 'nativewind';
  
@@ -61,53 +62,49 @@ const closeSearchModal = () => setModalVisible(false);
   };
   const handleInputSearchChange = (value) => {
     setSearch(value);
+    getTaskList(1);
 };
 
-const getTaskList = async (page = 1, filters = {}) => {
-  const token_no = "Bearer " + token;
-  setLoading(true);
-
-  console.log("token",token_no+" device "+deviceid);
-  try {
-    const body = {
-      ...filters, // ← flat structure as per Postman body
-    };
-        console.log("body values ",body);
-    const response = await fetch(`${BASE_URL_TESTING}crmtask-mylist?page=${page}`, {
-      method: 'POST', // use GET if supported; otherwise keep as POST with body
-      headers: {
-        'Authorization': token_no,
-        'device_id': deviceid,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-
-      },
-      body: JSON.stringify(body), // ensure body is correct JSON
-
-    });
-
-    const result = await response.json();
-    console.log('Task List Response:', result);
-
-    if (response.status === 200 && result.status === 'success') {
-      const data = result.data;
-      if (page === 1) {
-        setTasks(data.data); // ⬅️ Replace old list on fresh filter
+const getTaskList = async (page = 1) => {
+    const token_no = "Bearer " + token;
+    setLoading(true);
+  
+    console.log("token", token_no + " device " + deviceid);
+  
+    try {
+      const url = `${BASE_URL_TESTING}leads-list?page=${page}&search=${search}`;
+  
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': token_no,
+          'device_id': deviceid,
+          'Accept': 'application/json',
+        },
+      });
+  
+      const result = await response.json();
+      console.log('Task List Response:', result);
+  
+      if (response.status === 200 && result.status === 'success') {
+        const data = result.data;
+        if (page === 1) {
+          setTasks(data.data); // Replace old list on fresh filter
+        } else {
+          setTasks(prev => [...prev, ...data.data]); // Append for pagination
+        }
+        setCurrentPage(data.current_page);
+        setLastPage(data.last_page);
       } else {
-        setTasks(prev => [...prev, ...data.data]); // Append for pagination
+        console.warn('Task list fetch failed:', result.message);
       }
-      //setTasks(prev => [...prev, ...data.data]); // Append new tasks
-      setCurrentPage(data.current_page);
-      setLastPage(data.last_page);
-    } else {
-      console.warn('Task list fetch failed:', result.message);
+    } catch (error) {
+      console.log('Error fetching task list:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.log('Error fetching task list:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+  
 
 
   useEffect(() => {
@@ -121,7 +118,7 @@ const getTaskList = async (page = 1, filters = {}) => {
   }, []);
   useEffect(() => {
     if (token && deviceid) {
-      getTaskList(1,{});
+      getTaskList(1);
      }
   }, [token, deviceid]);
 
@@ -129,18 +126,21 @@ const getTaskList = async (page = 1, filters = {}) => {
  
   return (
     <View className="flex-1 bg-white">
-      <CustomHeader name="Task List" isBackIcon={true} />
-      <SearchInputBox value={search} onChangeText={handleInputSearchChange} onPress={openSearchModal}/>
+      <CustomHeader name="Lead List" isBackIcon={true} />
+      <SearchInputBox value={search} onChangeText={handleInputSearchChange}  />
 
-
+      <View className="flex-row justify-end mt-1">
+        <TouchableOpacity className="flex-row items-center  rounded-xl bg-blue-600 px-3 py-2 m-2" onPress={() => navigation.navigate('AddLead')}
+>
+          <FontAwesome name="plus" size={12} color="#FFFFFF" />
+          <Text className="text-white text-[10px] mr-1"> Add</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList style={{marginTop:10,marginBottom:70}}
         data={tasks}
         keyExtractor={(item) => item.uuid}
         renderItem={({ item }) => (
-          <TaskItemRow
-                name={item.assigned_to_name}
-                dueDate={item.days_overdue}
-                status={item.is_completed}
+          <LeadRowItem
                 details={item}
           />
         )}
@@ -149,19 +149,13 @@ const getTaskList = async (page = 1, filters = {}) => {
         ) : null}
         onEndReached={() => {
           if (!loading && currentPage < lastPage) {
-            getTaskList(currentPage + 1,{});
+            getTaskList(currentPage + 1);
           }
         }}
         onEndReachedThreshold={0.5}
       />
 
-       <SearchModal
-          visible={isModalVisible}
-          onClose={closeSearchModal}
-          onSearch={(payload) => {
-            getTaskList(1,payload);  
-          }}
-      />
+        
 
       <CustomFooter  />
 

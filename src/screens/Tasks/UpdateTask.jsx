@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, Text, View,TouchableOpacity } from 'react-native';
+import { Alert, Pressable, Text, View,TouchableOpacity,FlatList } from 'react-native';
 import CustomHeader from '../../component/Header/CustomHeader';
 import Container from '../../component/Container/Container';
 import CustomFooter from '../../component/Footer/CustomFooter';
@@ -18,17 +18,21 @@ import CommentsInputBox from '../../component/CommentsInputBox/CommentsInputBox'
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { BASE_URL_TESTING } from '../../api/Config';
+import ActivityRowItem from './ActivityRowItem';
 
 import moment from 'moment';
 
 function AddSettlement({ route }) {
     const [mode,setMode]=useState(false);
-    
+    const [expandedId, setExpandedId] = useState(null);
+    const [tasks, setTasks] = useState([]);
+
+
     const { details } = route.params || {};
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
-    const shouldShowForm = details?.is_update === 1 && details?.is_completed === 0;
+    const shouldShowForm = details?.is_update !== 1 && details?.is_completed !== 1;
 
     const [formValues, setFormValues] = useState({
         uuid: null,
@@ -46,7 +50,9 @@ function AddSettlement({ route }) {
             { label: "Completed", value: "completed" }
         ]
     });
-
+    const handlePress = (id) => {
+        setExpandedId((prev) => (prev === id ? null : id));
+      };
     useEffect(() => {
       if (details) {
         console.log("details",details+" date value as "+details.date);
@@ -61,6 +67,13 @@ function AddSettlement({ route }) {
 
 
           }));
+
+          if (Array.isArray(details.task_update)) {
+            setTasks(details.task_update);
+          } else {
+            console.warn("task_update is not an array");
+            setTasks([]);
+          }
       }
   }, [details]);
   
@@ -69,8 +82,7 @@ function AddSettlement({ route }) {
         if (name === "file_url") {
             setFormValues((prevState) => ({
                 ...prevState,
-                file_url: value.name,
-                file_url: value.base64,
+                 file_url: value.base64,
             }));
         } else {
             setFormValues((prev) => ({ ...prev, [name]: value }));
@@ -158,9 +170,10 @@ function AddSettlement({ route }) {
 
     return (
         <View className="flex-1 bg-white">
-            <CustomHeader name="Task Details" isBackIcon />
-            <Container paddingBottom={110}>
+            <CustomHeader name={shouldShowForm?"Update Activity":"Activity List"} isBackIcon />
+           
             {shouldShowForm ? (
+                <Container paddingBottom={110}>
                 <View style={{ marginTop: -15 }}>
                     <Spinner visible={loading} textContent="Loading..." />
  
@@ -247,14 +260,25 @@ function AddSettlement({ route }) {
                   </View>
 
                 </View>
+                </Container>
             ) : (
-                <View className="flex-1 justify-center items-center mt-10">
-                    <Text className="text-gray-500 text-base text-center">
-                    This task is already completed or cannot be updated.
-                    </Text>
+                <View className="flex-1 bg-white">
+                  
+                    <FlatList
+                    data={tasks}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={{ padding: 16 }}
+                    renderItem={({ item }) => (
+                        <ActivityRowItem
+                        item={item}
+                        isExpanded={expandedId === item.id}
+                        onPress={() => handlePress(item.id)}
+                        />
+                    )}
+                    />
                 </View>
              )}
-            </Container>
+            
             <CustomFooter  />
             </View>
     );

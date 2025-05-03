@@ -41,6 +41,12 @@ import TaskList from '../Tasks/TaskList';
 import UpdateTask from '../Tasks/UpdateTask';
 import UpdateSchedule from '../Tasks/UpdateSchedule';
 import CallHIstory from '../CallTracking/CallHistory';
+import LeadList from '../Lead/LeadList';
+import AddLead from '../Lead/AddLead';
+import Customers from '../Customers/Customers';
+import CustomerDetails from '../Customers/CustomerDetails';
+import LeadDetails from '../Lead/LeadDetails';
+
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -60,8 +66,13 @@ function Navigations() {
                 {isLoggedIn ? (
                     <>
                          <Stack.Screen name="Home" component={Home} />
+                         <Stack.Screen name="AddLead" component={AddLead} />
+                         <Stack.Screen name="LeadDetails" component={LeadDetails}/>
+                         <Stack.Screen name="CustomerDetails" component={CustomerDetails} />
+                         <Stack.Screen name="Customers" component={Customers} />
                         <Stack.Screen name="UpcomingAuction" component={UpcomingAuction} />
                         <Stack.Screen name="TaskList" component={TaskList} />
+                        <Stack.Screen name='LeadList' component={LeadList} />
                         <Stack.Screen name="CallHIstory" component={CallHIstory} />
                         <Stack.Screen name='UpdateTask' component={UpdateTask} />
                         <Stack.Screen name='UpdateSchedule' component={UpdateSchedule} />

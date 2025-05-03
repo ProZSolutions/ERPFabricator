@@ -56,7 +56,7 @@ const TextInputBox = ({
                         style={{
                             color: "#142650",
                             fontSize: 12,
-                            ...(multiline ? { minHeight: numberOfLines * 20 } : { height: 50 }),
+                            ...(multiline ? { minHeight: numberOfLines * 20 } : { height: 40 }),
                         }}
                     />
                     {isPercentage && (value || isFocused) && (

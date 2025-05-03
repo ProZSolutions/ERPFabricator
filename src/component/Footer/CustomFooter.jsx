@@ -52,7 +52,7 @@ function CustomFooter({
                 icon={FooterSettingIcon}
                 label="Tasks"
                 textClass="text-custom-companytxt text-sm font-medium"
-                onPress={() => navigation.navigate("Home")}
+                onPress={() => navigation.navigate("TaskList")}
             />
             <FooterButton
                 icon={FooterSettingIcon}
@@ -65,7 +65,7 @@ function CustomFooter({
                 icon={FooterSettingIcon}
                 label="Leads"
                 textClass="text-custom-companytxt text-sm font-medium"
-                onPress={() => navigation.navigate("Home")}
+                onPress={() => navigation.navigate("LeadList")}
             />
 
 

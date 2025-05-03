@@ -26,6 +26,7 @@ import handleError from "../../component/ErrorHandler/ErrorHandler";
 import { capitalizeFirstLetter } from "../../utils";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TaskList from "../Tasks/TaskList";
+import  Customers from '../Customers/Customers';
 
 //import Pusher from 'pusher-js/react-native';
 // import echo from "../../websocket";
@@ -109,8 +110,8 @@ const Home = () => {
 
   const navigationMap = {
     1: "MembersList",
-    2: "UpcomingAuction",
-    3: "PendingList",
+    2: "Customers",
+    3: "LeadList",
     4: "TransactionList",
     5: "MembersList",
     6: "TaskList",

@@ -1,30 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, Text, View, TouchableOpacity ,Dimensions} from 'react-native';
+import { Alert, Pressable, Text, View, TouchableOpacity ,Dimensions,Switch,TextInput,ActivityIndicator,FlatList} from 'react-native';
 import CustomHeader from '../../component/Header/CustomHeader';
 import Container from '../../component/Container/Container';
 import CustomFooter from '../../component/Footer/CustomFooter';
 import DropdownPickerBox from '../../component/DropdownBox/DropdownPickerBox';
 import TextInputBox from '../../component/TextInputBox/TextInputBox';
 import CustomDateTimePicker from '../../component/DateTimePicker/CustomDateTimePicker';
-import RightArrowIcon from '../../assets/svg-component/RightArrowIcon';
-import CustomButton from '../../component/Button/CustomButton';
 import { getData, postData } from '../../api/ApiService';
-import { capitalizeFirstLetter } from '../../utils';
 import handleError from '../../component/ErrorHandler/ErrorHandler';
 import Spinner from '../../component/Spinner/Spinner';
 import UploadIcon from '../../assets/svg-component/UploadIcon';
 import ImageUploadTextBox from '../../component/ImageUploadTextBox/ImageUploadTextBox';
-import CommentsInputBox from '../../component/CommentsInputBox/CommentsInputBox';
-import { useNavigation } from '@react-navigation/native';
+ import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { BASE_URL_TESTING } from '../../api/Config';
 import moment from 'moment';
 import { styled } from 'nativewind';
-const StyledButton = styled(TouchableOpacity);
-import  CheckboxWithLabel from '../../component/Checkbox/CheckboxWithLabel';
+ import  CheckboxWithLabel from '../../component/Checkbox/CheckboxWithLabel';
 import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import { PermissionsAndroid ,Platform} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
+import ScheduleRowItem from './ScheduleRowItem';
 
 
 
@@ -41,29 +37,54 @@ function AddSettlement({ route }) {
     const [modes, setModes] = useState([]);
     const [selectedMode, setSelectedMode] = useState(null); // Track selected mode
 
+     const [expandedId, setExpandedId] = useState(null);
+        const [tasks, setTasks] = useState([]);
+
     const [checkboxStatus, setCheckboxStatus] = useState(0); // 0 = unchecked, 1 = checked
     const [inquiryOptions, setInquiryOptions] = useState([]);
     const [replyOptions, setReplyOptions] = useState([]);
 
     const [selectedInquiry, setSelectedInquiry] = useState(null);
     const [selectedReply, setSelectedReply] = useState(null);
+    const [messurement, setMessurement] = useState(0);
+    const [unitOptions, setUnitOptions] = useState([]);
+    const [loadingUnits, setLoadingUnits] = useState(true);
+    const [selectedUnit,setSelectedUnit]=useState(null);
+    const [hasSetDefaultUnit, setHasSetDefaultUnit] = useState(false);
+    const[shouldShowForm,setShouldShowForm] = useState(false);
 
 
-
-    const shouldShowForm = details?.is_update === 1 && details?.is_completed === 0;
-
+ 
     const [formValues, setFormValues] = useState({
         uuid: null,
         stage: null,
         date: null,
         details: '',
-        file_url: ''
+         length: '',
+        width: '',
+        height: '',
+        unit: '',
+        lead_id:'',
+        mode_communication:'',
+        pipeline_id:'',
+        content_reply:'',
+        customer_reply:'',
+        notes:'',
+        file_url:null,
+        is_schedule:'1',
+        schedule_id:'',
+        send_msg:'0',
+        latitude:null,
+        longitude:null
     });
 
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (details) {
+            console.log("shown details "+details?.is_completed);  
+            setShouldShowForm(details?.is_completed !== 1);
+            console.log("details comple ",details.is_completed);
             setFormValues((prev) => ({
                 ...prev,
                 uuid: details.uuid || null,
@@ -72,15 +93,31 @@ function AddSettlement({ route }) {
                 details: details.latest_update || '',
                 file_url: details.file_url || '',
             }));
+
+            if (Array.isArray(details.activity)) {
+                setTasks(details.activity); // set the array directly
+              } else {
+                console.warn("task_update is null or not an array");
+                setTasks([]);
+              }
+              
         }
     }, [details]);
+    const handleChange = (field, value) => {
+        setFormValues(prev => ({
+          ...prev,
+          [field]: value,
+        }));
+      };
 
+    const handleUnitCheange = (val) => {
+        setFormValues(prev => ({ ...prev, unit: val }));
+      };
     const handleValueChange = (name, value) => {
         if (name === "file_url") {
             setFormValues((prevState) => ({
                 ...prevState,
-                file_url: value.name,
-                file_url: value.base64,
+                 file_url: value.base64,
             }));
         } else {
             setFormValues((prev) => ({ ...prev, [name]: value }));
@@ -103,33 +140,70 @@ function AddSettlement({ route }) {
         const newErrors = {};
         if (!formValues.date) newErrors.date = 'Please select date.';
         if (!formValues.stage) newErrors.stage = 'Please select status.';
+
+        if (!selectedMode) newErrors.mode = 'Please select a mode of communication.';
+        if (!selectedInquiry) newErrors.inquiry = 'Please select an inquiry.';
+        if (!selectedReply) newErrors.reply = 'Please select a reply.';
+
+        if ((selectedMode?.name === 'Email' || selectedMode?.name === 'WhatsApp') && checkboxStatus === 1) {
+            if (!formValues.file_url) newErrors.file_url = 'Please attach a file.';
+        }
+
+        const selectedStage = options.stage.find(opt => opt.value === formValues.stage);
+        if (selectedStage?.label === 'Field Visit') {
+            if(messurement===1){
+                if(!formValues.length) newErrors.length="Enter length";
+                if(!formValues.width) newErrors.width="Enter width";
+                if(!formValues.height) newErrors.height="Enter height";
+                if(!formValues.unit) newErrors.unit="Select unit";
+            }
+        }
+        if (selectedMode?.name === 'Direct') {
+            if (!selectedLocation?.latitude || !selectedLocation?.longitude) {
+                newErrors.location = 'Please select a location on the map.';
+            }
+         
+        }
          setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    const handlePress = (event) => {
-        const { latitude, longitude } = event.nativeEvent.coordinate;
-        console.log("onclick",latitude+" "+longitude);
-        setSelectedLocation({ latitude, longitude });
-        onLocationSelect({ latitude, longitude });
+    const handlePress = (id) => {
+        setExpandedId((prev) => (prev === id ? null : id));
       };
     const handleSubmit = async () => {
         if (!validateForm()) {
-            console.log('Validation errors:', errors);
-            return;
+             return;
         }
 
         setLoading(true);
         try {
             const requestPayload = {
                 uuid: details.uuid,
+                lead_id:details.lead_id,
                 file_url: formValues.file_url,
-                update_status: formValues.stage,
+                update_status: formValues.stage,  // Assuming this holds stage ID
                 notes: formValues.notes,
-                date: moment(formValues.date ? new Date(formValues.date) : new Date()).format("YYYY-MM-DD"),
+                date: moment(formValues.date ? new Date(formValues.date) : new Date()).format("YYYY-MM-DD HH:mm:ss"),
+                mode_communication: selectedMode?.id,
+                pipeline_id: formValues.stage   , // Replace with correct if different
+                customer_reply: selectedReply,
+                content_reply: selectedInquiry,
+                length: formValues.length,
+                width: formValues.width,
+                height: formValues.height,
+                unit: formValues.unit,
+                latitude: selectedLocation?.latitude,
+                longitude: selectedLocation?.longitude,
+                is_schedule: '1',
+                schedule_id: details.uuid,
+                send_msg: checkboxStatus.toString(), // or 1/0 as string
             };
-            const response = await postData('/crm/crmtaskupdate-create', requestPayload);
-            console.log("API Response:", response);
 
+             console.log(JSON.stringify(requestPayload, null, 2));
+
+
+            const response = await postData(`${BASE_URL_TESTING}activity-create`, requestPayload);
+  
             if (response.status === "success") {
                 Alert.alert(
                     "Success",
@@ -165,8 +239,7 @@ function AddSettlement({ route }) {
         }
     };
       const getCurrentLocation = async () => {
-        console.log('Get current location called', Platform.OS);
-    
+     
         if (Platform.OS === 'android') {
           try {
             const granted = await PermissionsAndroid.request(
@@ -174,16 +247,13 @@ function AddSettlement({ route }) {
             );
     
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-              console.log('Permission granted');
-    
+     
               Geolocation.getCurrentPosition(
                 (position) => {
-                    console.log(" location params ",position);
-                  console.log('Current location:', position.coords.latitude+" lng "+position.coords.longitude);
-                /*  setSelectedLocation({
+                   setSelectedLocation({
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
-                  }); */
+                  });  
                 },
                 (error) => {
                   console.error('Location error:', error);
@@ -209,8 +279,7 @@ function AddSettlement({ route }) {
             if (result === 'granted') {
               Geolocation.getCurrentPosition(
                 (position) => {
-                  console.log('Current location:', position);
-                  setLatitude(position.coords.latitude);
+                   setLatitude(position.coords.latitude);
                   setLongitude(position.coords.longitude);
                 },
                 (error) => {
@@ -240,19 +309,17 @@ function AddSettlement({ route }) {
                         .filter(item => item.name !== 'New')
                         .map(item => ({
                             label: item.name,
-                            value: item.uuid,
-                            meta: { id: item.id },
+                            value: item.id,
+                            meta: { id: item.uuid },
                         }));
                     setOptions(prev => ({ ...prev, stage: formattedOptions }));
 
                     // Set default stage value after options are loaded
                     if (details?.stages_id) {
-                            console.log("Trying to set default stage from stages_id:", details.stages_id);
- 
+  
                         const matchedOption = formattedOptions.find(opt => opt.meta?.id === details.stages_id);
                         if (matchedOption) {
-                            console.log("Matched default option:", matchedOption);
-
+ 
                             setFormValues(prev => ({
                                 ...prev,
                                 stage: matchedOption.value,
@@ -298,13 +365,35 @@ function AddSettlement({ route }) {
         };
     
         fetchInquiries();
+        const fetchUnits = async () => {
+            try {
+              const data = await getData(`${BASE_URL_TESTING}unit_master?name=&price=`); // Already parsed JSON
+               const activeUnits = data.data
+                    .filter(unit => unit.is_active === 1)
+                    .map(unit => ({ label: unit.unit_name, value: unit.id }));
+
+                 setUnitOptions(activeUnits);
+
+                 if (!hasSetDefaultUnit && activeUnits.length > 0) {
+                    setFormValues(prev => ({ ...prev, unit: activeUnits[0].value }));
+                    setHasSetDefaultUnit(true);
+                  }
+            } catch (error) {
+              console.error('Failed to fetch units:', error);
+            } finally {
+              setLoadingUnits(false);
+            }
+          };
+      
+          fetchUnits();
         
     }, [details]);
 
     return (
         <View className="flex-1 bg-white">
-            <CustomHeader name="Task Details" isBackIcon />
-            <Container paddingBottom={110}>
+            <CustomHeader name={shouldShowForm?"Update Schedule":"Schedule List"} isBackIcon />
+            {shouldShowForm ? (
+                <Container paddingBottom={110}>
                 <View style={{ marginTop: -15 }}>
                     <Spinner visible={loading} textContent="Loading..." />
 
@@ -348,7 +437,20 @@ function AddSettlement({ route }) {
                                 className={`border border-green-500 px-4 py-2 mb-2 rounded ${selectedMode?.uuid === item.uuid ? 'bg-green-100' : ''}`}
                                 onPress={() => {
                                     setSelectedMode(item);
+                                    setMessurement(0);
                                     setCheckboxStatus(0); // reset checkbox when selecting a new mode
+                                    setFormValues(prev => ({
+                                    ...prev,
+                                    file_url: '',
+                                    length: '',
+                                    width: '',
+                                    height: '',
+                                    unit: ''
+                                }));
+
+                            // Reset location
+                            setSelectedLocation({ latitude: null, longitude: null });
+                            getCurrentLocation();
                                 }}
 
                                 >
@@ -358,6 +460,9 @@ function AddSettlement({ route }) {
                                 </TouchableOpacity>
                             ))}
                      </View>
+                     {errors.mode  && (
+                        <Text className="text-red-500 font-normal text-[12px]">{errors.mode }</Text>
+                    )}
                     <DropdownPickerBox
                         label={
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -371,9 +476,11 @@ function AddSettlement({ route }) {
                         placeholder="Select Inquiry"
                         value={selectedInquiry}
                     />
+                     {errors.inquiry   && (
+                        <Text className="text-red-500 font-normal text-[12px]">{errors.inquiry  }</Text>
+                    )}
 
-                    {/* Reply Dropdown */}
-                    <DropdownPickerBox
+                     <DropdownPickerBox
                         label={
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <FontAwesome name="reply" size={13} color="#000" style={{ marginRight: 6 }} />
@@ -386,9 +493,23 @@ function AddSettlement({ route }) {
                         placeholder="Select Reply"
                         value={selectedReply}
                     />
+                    {errors.reply    && (
+                        <Text className="text-red-500 font-normal text-[12px]">{errors.reply  }</Text>
+                    )}
 
-
-                 
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 5 }}>
+                        <FontAwesome name="file-text" size={13} color="#000" style={{ marginRight: 6 }} />
+                        <Text style={{ color: '#000', fontSize: 12 }}> Notes </Text>
+                     </View>
+                    <TextInputBox
+                         placeholder="Notes"
+                        value={formValues.notes}
+                        onChangeText={(text) => handleValueChange('notes', text)}
+                        errorMessage={errors.details}
+                        multiline={true}
+                        numberOfLines={5}
+                        textAlignVertical="top"
+                    />
 
 
                      {(selectedMode?.name === 'Email' || selectedMode?.name === 'WhatsApp') && (
@@ -415,24 +536,65 @@ function AddSettlement({ route }) {
                             </View>
                            
                     )}
-                    
+                    {options.stage.find(opt => opt.value === formValues.stage)?.label === 'Field Visit' && (
+                    <View className="p-4">
+                        <View className="flex-row items-center mb-2">
+                                <CheckboxWithLabel
+                                                    label={`Add Area Dimension Details`}
+                                                    value={messurement}
+                                                    onToggle={() => setMessurement(prev => (prev === 1 ? 0 : 1))}
+                                                />
+                        </View> 
+                        {messurement === 1 && (
+                        <View className="flex-row flex-wrap justify-between">
+                            {['length', 'width', 'height'].map((field) => (
+                            <View key={field} className="w-[48%] mb-4">
+                            <Text style={{ color: '#000', fontSize: 12,marginBottom:4 }}>
+                                {field} <Text className="text-red-500">*</Text>
+                                </Text>
+                                <TextInputBox
+                                keyboardType="numeric"
+                                value={formValues[field]}
+                                onChangeText={(text) => handleChange(field, text)}
+                                />
+                                {errors[field] && (
+                                        <Text className="text-red-500 text-xs mt-1">{errors[field]}</Text>
+                                    )}
+                            </View>
+                            ))}
+
+                            {/* Unit */}
+                            <View className="w-[48%] mb-4">
+                            <DropdownPickerBox
+                                            label={
+                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                    <Text style={{ fontSize: 10, color: '#000' }}>Unit</Text>
+                                                    <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                                                </View>
+                                            }
+                                            options={unitOptions}
+                                             placeholder="Select Unit"
+                                            value={formValues.unit}
+                                            onValueChange={handleUnitCheange}
 
 
-                    {/* Description */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 5 }}>
-                        <FontAwesome name="file-text" size={13} color="#000" style={{ marginRight: 6 }} />
-                        <Text style={{ color: '#000', fontSize: 12 }}> Notes </Text>
-                     </View>
-                    <TextInputBox
-                         placeholder="Notes"
-                        value={formValues.notes}
-                        onChangeText={(text) => handleValueChange('notes', text)}
-                        errorMessage={errors.details}
-                        multiline={true}
-                        numberOfLines={5}
-                        textAlignVertical="top"
-                    />
-                          <View style={{ height: 300, marginVertical: 10 }}>
+                                        />
+                                        {errors.unit   && (
+                                            <Text className="text-red-500 font-normal text-[12px]">{errors.unit  }</Text>
+                                        )}
+                            </View>
+                         </View>
+                        )}
+                        </View>
+                    )}
+ 
+
+
+                 
+                    {(selectedMode?.name === 'Direct' ) && (
+
+                            <View className="p-4"> 
+                            <View style={{ height: 300, marginVertical: 10 }}>
                             <MapView
                                 provider={PROVIDER_GOOGLE}
                                 style={{ flex: 1 }}
@@ -444,14 +606,18 @@ function AddSettlement({ route }) {
                                 }}
                                 onPress={(event) => {
                                         const { latitude, longitude } = event.nativeEvent.coordinate;
-                                        console.log("Map pressed:", latitude, longitude);
-                                        setSelectedLocation({ latitude, longitude });
+                                         setSelectedLocation({ latitude, longitude });
                                         }}
                                 pointerEvents="auto"
                             >
                                 <Marker coordinate={selectedLocation} />
                             </MapView>
+                            </View>
                         </View>
+                        )}
+                        {errors.location      && (
+                         <Text className="text-red-500 font-normal text-[12px]">{errors.location    }</Text>
+                          )}
 
                      
 
@@ -465,7 +631,25 @@ function AddSettlement({ route }) {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </Container>
+                </Container>
+            ) : (
+                  <View className="flex-1 bg-white">
+                                                  
+                       <FlatList
+                            data={tasks}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={{ padding: 16 }}
+                             renderItem={({ item }) => (
+                                    <ScheduleRowItem
+                                          item={item}
+                                          isExpanded={expandedId === item.id}
+                                           onPress={() => handlePress(item.id)}
+                                          />
+                                           )}
+                                                    />
+                                                </View>
+                             )}
+          
             <CustomFooter />
         </View>
     );
