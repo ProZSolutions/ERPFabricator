@@ -886,7 +886,7 @@ function AddLead() {
                 </Container>
 
               
-                <CustomFooter />
+                <CustomFooter isLead={true}/>
             </View>
         );  
 }

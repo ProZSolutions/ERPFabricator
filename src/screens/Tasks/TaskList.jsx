@@ -30,6 +30,9 @@ const handleSearchInputChange = (text) => setSearch(text);
 const openSearchModal = () => setModalVisible(true);
 const closeSearchModal = () => setModalVisible(false);
 
+const [expandedTaskId, setExpandedTaskId] = useState(null);
+
+
 
         const [search, setSearch] = useState("");
       const navigation = useNavigation();
@@ -91,6 +94,7 @@ const getTaskList = async (page = 1, filters = {}) => {
 
     if (response.status === 200 && result.status === 'success') {
       const data = result.data;
+       
       if (page === 1) {
         setTasks(data.data); // ⬅️ Replace old list on fresh filter
       } else {
@@ -111,13 +115,7 @@ const getTaskList = async (page = 1, filters = {}) => {
 
 
   useEffect(() => {
-    const handler = setTimeout(() => {
        getDeviceId();
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
   }, []);
   useEffect(() => {
     if (token && deviceid) {
@@ -142,6 +140,10 @@ const getTaskList = async (page = 1, filters = {}) => {
                 dueDate={item.days_overdue}
                 status={item.is_completed}
                 details={item}
+                  isExpanded={expandedTaskId === item.uuid}
+onPress={() => {
+    setExpandedTaskId(expandedTaskId === item.uuid ? null : item.uuid);
+  }}
           />
         )}
         ListFooterComponent={loading ? (
@@ -163,7 +165,7 @@ const getTaskList = async (page = 1, filters = {}) => {
           }}
       />
 
-      <CustomFooter  />
+      <CustomFooter isTask={true} />
 
      </View>
   );

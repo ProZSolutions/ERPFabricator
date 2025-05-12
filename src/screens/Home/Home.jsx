@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { View, Text, Alert, BackHandler,PermissionsAndroid  } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Geolocation from 'react-native-geolocation-service';
+import PushNotification from 'react-native-push-notification';
+
 
 import CustomHeader from "../../component/Header/CustomHeader";
 import CustomHeading from "../../component/Heading/CustomHeading";
@@ -66,8 +68,18 @@ const Home = () => {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
         );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
+
+        const notificationGranted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+
+
+
+        return {
+          locationPermission: granted === PermissionsAndroid.RESULTS.GRANTED,
+          notificationPermission: notificationGranted === PermissionsAndroid.RESULTS.GRANTED,
+        };
+       } catch (err) {
         console.warn(err);
         return false;
       }
@@ -86,13 +98,13 @@ const Home = () => {
   useFocusEffect(
     useCallback(() => {
       const backAction = () => {
-        Alert.alert("Hold on!", "Are you sure you want to logout the app?", [
+        Alert.alert("Hold on!", "Are you sure you want to exit the app?", [
           { text: "Cancel", onPress: () => null, style: "cancel" },
           {
             text: "YES",
             onPress: async () => {
-              await removeValue("userInfo");
-              setUserInfo(null);
+              BackHandler.exitApp(); // 👈 This closes the app
+
             },
           },
         ]);
@@ -112,10 +124,10 @@ const Home = () => {
     1: "MembersList",
     2: "Customers",
     3: "LeadList",
-    4: "TransactionList",
-    5: "MembersList",
-    6: "TaskList",
-    7: "PorfitLoss",
+    4: "CallHIstory",
+    5: "TaskList",
+    6: "ProfileDetails",
+    7: "ProfileDetails",
   };
 
   const myChitNavigations = {
@@ -137,13 +149,14 @@ const Home = () => {
   };
 
   const fetchDashboardData = async (user) => {
+    console.log("user details:", JSON.stringify(user, null, 2));
  
       if(parseInt(user.role)===10){
         // employee
         
-        const titles=["Attendance","Customer Management", "Lead Follow-up", "Site Visit", 
-          "Quatation Generation", "Project Task Update", 
-          "Customer Feedback"];
+        const titles=["Attendance","Customers", "Leads", "Calls", 
+          "Tasks", "Profile", 
+          "Notification"];
           const icons = [
             <LiveChitIcon />,
             <UpcomingChitIcon />,
@@ -201,13 +214,20 @@ const Home = () => {
   useFocusEffect(
     useCallback(() => {
       fetchDashboardData(); 
+
     }, [])
   );
 
   return (
     <View className="flex-1 bg-white">
       <CustomHeader name="Home" isLogout={true} />
-      <CustomHeading title={`Hi, ${capitalizeFirstLetter(userDetails?.name)}`} subTitle="Nice to have you back!" />
+      <CustomHeading 
+        title={
+    userDetails?.name
+      ? `Hi, ${capitalizeFirstLetter(userDetails.name)}`
+      : `Hi, ${userDetails?.emp_no ?? ''}`
+  }
+       subTitle="Nice to have you back!" />
       <Container paddingBottom={80}>
         <Spinner visible={loading} textContent="Loading..." />
         <View className="px-4">
@@ -225,7 +245,7 @@ const Home = () => {
          
         </View>
       </Container>
-      <CustomFooter  />
+      <CustomFooter isHome={true} />
 
      </View>
   );

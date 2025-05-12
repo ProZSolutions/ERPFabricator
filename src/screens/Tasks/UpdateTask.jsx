@@ -55,7 +55,7 @@ function AddSettlement({ route }) {
       };
     useEffect(() => {
       if (details) {
-        console.log("details",details+" date value as "+details.date);
+        console.log("details",JSON.stringify(details)+" task List  "+JSON.stringify(details.task_update));
 
           setFormValues((prev) => ({
               ...prev,
@@ -263,23 +263,26 @@ function AddSettlement({ route }) {
                 </Container>
             ) : (
                 <View className="flex-1 bg-white">
-                  
+                   {tasks.length === 0 ? (
+                    <Text style={{ textAlign: 'center', marginTop: 20 ,color:'#000'}}>No task updates available.</Text>
+                    ) : (
                     <FlatList
-                    data={tasks}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ padding: 16 }}
-                    renderItem={({ item }) => (
+                        data={tasks}
+                        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
+                        contentContainerStyle={{ padding: 16 }}
+                        renderItem={({ item }) => (
                         <ActivityRowItem
-                        item={item}
-                        isExpanded={expandedId === item.id}
-                        onPress={() => handlePress(item.id)}
+                            item={item}
+                            isExpanded={expandedId === item.id}
+                            onPress={() => handlePress(item.id)}
                         />
-                    )}
+                        )}
                     />
+                    )}
                 </View>
              )}
             
-            <CustomFooter  />
+            <CustomFooter isTask={true}  />
             </View>
     );
 }

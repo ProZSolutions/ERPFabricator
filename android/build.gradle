@@ -10,6 +10,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        
     }
     dependencies {
         classpath("com.android.tools.build:gradle")
@@ -20,6 +21,16 @@ buildscript {
 
 apply plugin: "com.facebook.react.rootproject"
 allprojects {
+     repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://www.jitpack.io' }  // Ensure it's added here as well
+          maven {
+         // react-native-background-fetch
+         url("${project(':react-native-background-fetch').projectDir}/libs")
+         }
+    }
     configurations.all {
         resolutionStrategy {
             force 'com.google.android.gms:play-services-location:20.0.0'

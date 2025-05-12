@@ -24,15 +24,16 @@ import ScheduleRowItem from './ScheduleRowItem';
 
 
 
-function AddSettlement({ route }) {
+function AddSchedule({ route }) {
+  const { lead } = route.params || {};  
+
     const [selectedLocation, setSelectedLocation] = useState({
         latitude: 11.2284893,
         longitude: 78.1450853,
       });
     const [mode, setMode] = useState(false);
     const [options, setOptions] = useState({ stage: [] });
-    const { details } = route.params || {};
-    const [loading, setLoading] = useState(false);
+     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
     const [modes, setModes] = useState([]);
     const [selectedMode, setSelectedMode] = useState(null); // Track selected mode
@@ -51,8 +52,11 @@ function AddSettlement({ route }) {
     const [loadingUnits, setLoadingUnits] = useState(true);
     const [selectedUnit,setSelectedUnit]=useState(null);
     const [hasSetDefaultUnit, setHasSetDefaultUnit] = useState(false);
-    const[shouldShowForm,setShouldShowForm] = useState(false);
-
+ 
+    const [inquiryLoaded, setInquiryLoaded] = useState(false);
+    const [replyLoaded, setReplyLoaded] = useState(false);
+    
+ 
 
  
     const [formValues, setFormValues] = useState({
@@ -80,29 +84,7 @@ function AddSettlement({ route }) {
 
     const [errors, setErrors] = useState({});
 
-    useEffect(() => {
-        if (details) {
-            console.log("shown details "+details?.is_completed);  
-            setShouldShowForm(details?.is_completed !== 1);
-            console.log("details comple ",details.is_completed);
-            setFormValues((prev) => ({
-                ...prev,
-                uuid: details.uuid || null,
-                // Removed hardcoded stage to prevent overriding
-                date: details.date ? new Date(details.date) : new Date(),
-                details: details.latest_update || '',
-                file_url: details.file_url || '',
-            }));
-
-            if (Array.isArray(details.activity)) {
-                setTasks(details.activity); // set the array directly
-              } else {
-                console.warn("task_update is null or not an array");
-                setTasks([]);
-              }
-              
-        }
-    }, [details]);
+   
     const handleChange = (field, value) => {
         setFormValues(prev => ({
           ...prev,
@@ -178,8 +160,8 @@ function AddSettlement({ route }) {
         setLoading(true);
         try {
             const requestPayload = {
-                uuid: details.uuid,
-                lead_id:details.lead_id,
+                uuid: lead.uuid,
+                lead_id:lead.id,
                 file_url: formValues.file_url,
                 update_status: formValues.stage,  // Assuming this holds stage ID
                 notes: formValues.notes,
@@ -195,7 +177,7 @@ function AddSettlement({ route }) {
                 latitude: selectedLocation?.latitude,
                 longitude: selectedLocation?.longitude,
                 is_schedule: '1',
-                schedule_id: details.uuid,
+                schedule_id: lead.uuid,
                 send_msg: checkboxStatus.toString(), // or 1/0 as string
             };
 
@@ -233,6 +215,12 @@ function AddSettlement({ route }) {
                     value: item.id
                 }));
                 setReplyOptions(formatted);
+                setReplyLoaded(true);
+
+
+                 if (lead?.customer_reply) {
+                setSelectedReply(lead.customer_reply);
+                 }
             }
         } catch (err) {
             await handleError(err);
@@ -300,6 +288,7 @@ function AddSettlement({ route }) {
       };
 
     useEffect(() => {
+        console.log("details","as "+JSON.stringify(lead));
         getCurrentLocation();
         const fetchUploadStatusOptions = async () => {
             try {
@@ -315,9 +304,9 @@ function AddSettlement({ route }) {
                     setOptions(prev => ({ ...prev, stage: formattedOptions }));
 
                     // Set default stage value after options are loaded
-                    if (details?.stages_id) {
+                    if (lead?.stages_id) {
   
-                        const matchedOption = formattedOptions.find(opt => opt.meta?.id === details.stages_id);
+                        const matchedOption = formattedOptions.find(opt => opt.meta?.id === 1);
                         if (matchedOption) {
  
                             setFormValues(prev => ({
@@ -326,7 +315,7 @@ function AddSettlement({ route }) {
                             }));
                         }
                     } else {
-                        console.warn("No matched stage option found for stages_id:", details.stages_id);
+                        console.warn("No matched stage option found for stages_id:", 1);
                       }
                 }
             } catch (error) {
@@ -358,6 +347,13 @@ function AddSettlement({ route }) {
                         uuid:item.uuid
                     }));
                     setInquiryOptions(formatted);
+                    setInquiryLoaded(true);
+
+
+                    if (lead?.content_reply) {
+                        setSelectedInquiry(lead.content_reply);
+                        handleInquiryChange(lead.content_reply);
+                    }
                 }
             } catch (err) {
                 await handleError(err);
@@ -386,13 +382,65 @@ function AddSettlement({ route }) {
           };
       
           fetchUnits();
+
+
+
         
-    }, [details]);
+    }, [lead]);
+
+    useEffect(() => {
+    console.log("details", "as " + JSON.stringify(lead));
+     
+    // ... existing fetch functions
+
+    // Pre-fill form values from lead object
+    if (lead) {
+        // Prefill Date
+        setFormValues(prev => ({
+            ...prev,
+            date: lead.date ? moment(lead.date).toDate() : new Date(),
+            notes: lead.notes || '',
+            file_url: lead.file_url || '',
+            length: lead.length?.toString() || '',
+            width: lead.width?.toString() || '',
+            height: lead.height?.toString() || '',
+            unit: lead.unit || '',
+        }));
+
+        // Set Stage (Purpose)
+        if (lead.stages_id) {
+            setFormValues(prev => ({
+                ...prev,
+                stage: lead.stages_id,
+            }));
+        }
+
+        // Set Mode of Communication
+        if (lead.mode_communication) {
+            const matchedMode = modes.find(mode => mode.id === lead.mode_communication);
+            if (matchedMode) {
+                setSelectedMode(matchedMode);
+            }
+        }
+
+        // Set Content Reply (Inquiry)
+        if (lead.content_reply) {
+            setSelectedInquiry(lead.content_reply);
+            handleInquiryChange(lead.content_reply); // load related replies
+        }
+
+        // Set Customer Reply
+        if (lead.customer_reply) {
+            setSelectedReply(lead.customer_reply);
+        }
+    }
+}, [lead, modes]); // <- Ensure `modes` is loaded before setting mode
+
 
     return (
         <View className="flex-1 bg-white">
-            <CustomHeader name={shouldShowForm?"Update Schedule":"Schedule List"} isBackIcon />
-            {shouldShowForm ? (
+            <CustomHeader name={"Edit Activity "} isBackIcon />
+         
                 <Container paddingBottom={110}>
                 <View style={{ marginTop: -15 }}>
                     <Spinner visible={loading} textContent="Loading..." />
@@ -590,36 +638,7 @@ function AddSettlement({ route }) {
  
 
 
-                 
-                    {(selectedMode?.name === 'Direct' ) && (
-
-                            <View className="p-4"> 
-                            <View style={{ height: 300, marginVertical: 10 }}>
-                            <MapView
-                                provider={PROVIDER_GOOGLE}
-                                style={{ flex: 1 }}
-                                region={{
-                                latitude: selectedLocation.latitude,
-                                longitude: selectedLocation.longitude,
-                                latitudeDelta: 0.01,
-                                longitudeDelta: 0.01,
-                                }}
-                                onPress={(event) => {
-                                        const { latitude, longitude } = event.nativeEvent.coordinate;
-                                         setSelectedLocation({ latitude, longitude });
-                                        }}
-                                pointerEvents="auto"
-                            >
-                                <Marker coordinate={selectedLocation} />
-                            </MapView>
-                            </View>
-                        </View>
-                        )}
-                        {errors.location      && (
-                         <Text className="text-red-500 font-normal text-[12px]">{errors.location    }</Text>
-                          )}
-
-                     
+               
 
                     {/* Buttons */}
                     <View className="flex-row justify-between mt-4">
@@ -627,32 +646,16 @@ function AddSettlement({ route }) {
                             <Text className="text-white font-semibold text-sm">Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
-                            <Text className="text-white font-semibold text-sm">Add Activity</Text>
+                            <Text className="text-white font-semibold text-sm">Edit Activity</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
                 </Container>
-            ) : (
-                  <View className="flex-1 bg-white">
-                                                  
-                       <FlatList
-                            data={tasks}
-                            keyExtractor={(item) => item.id}
-                            contentContainerStyle={{ padding: 16 }}
-                             renderItem={({ item }) => (
-                                    <ScheduleRowItem
-                                          item={item}
-                                          isExpanded={expandedId === item.id}
-                                           onPress={() => handlePress(item.id)}
-                                          />
-                                           )}
-                                                    />
-                                                </View>
-                             )}
+       
           
             <CustomFooter isTask={true} />
         </View>
     );
 }
 
-export default AddSettlement;
+export default AddSchedule;

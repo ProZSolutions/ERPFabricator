@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getValue } from '../component/AsyncStorage/AsyncStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
  
@@ -15,8 +16,17 @@ const api = axios.create({
 api.interceptors.request.use(
     async (config) => {
         const token = await getValue('userInfohrms');
+
+
+        const userInfoStr = await AsyncStorage.getItem('userInfohrms');
+        const deviceId = await AsyncStorage.getItem('device_id');
+  
+        const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+        const bearerToken = userInfo?.bearer_token;
+        console.log("bearer token "+bearerToken+" device id "+deviceId);
+
         if (token) {
-            config.headers['Authorization'] = `Bearer ${token.bearer_token}`;
+             config.headers['Authorization'] = `Bearer ${token.bearer_token}`;
         }
         return config;
     },

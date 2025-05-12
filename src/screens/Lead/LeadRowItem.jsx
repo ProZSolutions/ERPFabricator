@@ -85,10 +85,8 @@ const ContactCard = ({ details }) => {
       };
   return (
     <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 m-3">
-      {/* Top Row: Avatar and Actions */}
-      <View className="flex-row items-center justify-between">
-        {/* Left: Avatar and Name */}
-        <View className="flex-row items-center">
+       <View className="flex-row items-center justify-between">
+         <View className="flex-row items-center">
             <View className={`${getRandomColor()} rounded-full w-10 h-10 items-center justify-center mr-1`}>
                     <Text className="text-black font-bold">{firstLetter}</Text>
             </View>
@@ -101,8 +99,7 @@ const ContactCard = ({ details }) => {
           </View>
         </View>
 
-        {/* Right: Actions */}
-        <View className="flex-row items-center space-x-3">
+         <View className="flex-row items-center space-x-3">
         {details?.lead_contact && (
           <View className="items-center">
             <TouchableOpacity className="border border-gray-300 p-2 rounded-full"   onPress={() => handleCall(details.lead_contact)}>

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity,Image, Linking  } from 'react-native';
 const isImage = (url) => {
     return /\.(jpeg|jpg|gif|png|webp)$/i.test(url);
   };
-export default TaskItem = ({ item, isExpanded, onPress }) => {
+const ActivityRowItem  = ({ item, isExpanded, onPress }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -30,24 +30,25 @@ export default TaskItem = ({ item, isExpanded, onPress }) => {
             <FontAwesome name="file-text-o" size={14} color="#4B5563" />
             <Text className="ml-2 text-[12px] text-gray-500">Task Description</Text>
           </View>
-
+          {item.details ? (
           <View className="mt-2 border border-gray-300 rounded p-2">
             <Text className="text-gray-600 text-[10px]">{item.details}</Text>
           </View>
+          ) : null}
 
            {/* Attachment section */}
-           {item.attachment && (
+           {item.file_url  && (
             <View className="mt-3">
               <Text className="text-[12px] text-gray-700 mb-1">Attachment:</Text>
-              {isImage(item.attachment) ? (
+              {isImage(item.file_url ) ? (
                 <Image
-                  source={{ uri: item.attachment }}
+                  source={{ uri: item.file_url  }}
                   className="w-full h-40 rounded-md"
                   resizeMode="cover"
                 />
               ) : (
                 <TouchableOpacity
-                  onPress={() => Linking.openURL(item.attachment)}
+                  onPress={() => Linking.openURL(item.file_url )}
                   className="flex-row items-center space-x-2 bg-white p-2 rounded border border-gray-300"
                 >
                   <FontAwesome name="file" size={16} color="#4B5563" />
@@ -66,3 +67,4 @@ export default TaskItem = ({ item, isExpanded, onPress }) => {
     </TouchableOpacity>
   );
 };
+export default ActivityRowItem;

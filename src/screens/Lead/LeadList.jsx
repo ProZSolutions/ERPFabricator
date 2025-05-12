@@ -1,9 +1,6 @@
 import React, { useEffect, useState} from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, Platform ,Image,ActivityIndicator,FlatList} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Geolocation from 'react-native-geolocation-service';
-import { PermissionsAndroid } from 'react-native';
-import { RNCamera } from 'react-native-camera';
+import { useNavigation } from '@react-navigation/native'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getValue, removeValue } from "../../component/AsyncStorage/AsyncStorage";
 import CustomFooter from '../../component/Footer/CustomFooter';
@@ -157,7 +154,7 @@ const getTaskList = async (page = 1) => {
 
         
 
-      <CustomFooter  />
+      <CustomFooter isLead={true} />
 
      </View>
   );

@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useContext ,useEffect} from 'react';
+import { NavigationContainer,useNavigationContainerRef  } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from '../Home/Home';
 import Login from '../Login/Login';
@@ -40,25 +40,37 @@ import ExistingChitSummary from '../ExistingChit/ExistingChitSummary';
 import TaskList from '../Tasks/TaskList';
 import UpdateTask from '../Tasks/UpdateTask';
 import UpdateSchedule from '../Tasks/UpdateSchedule';
+
+import AddSchedule from '../Tasks/AddSchedule';
+import AddActivity from '../Tasks/AddActivity';
+import EditActivity from '../Tasks/EditActivity';
 import CallHIstory from '../CallTracking/CallHistory';
 import LeadList from '../Lead/LeadList';
 import AddLead from '../Lead/AddLead';
 import Customers from '../Customers/Customers';
 import CustomerDetails from '../Customers/CustomerDetails';
 import LeadDetails from '../Lead/LeadDetails';
+import ProfileDetails from '../Profile/ProfileDetails';
+import {usePusher} from '../../usePusher';
 
+import PushNotification from 'react-native-push-notification';
+import { navigationRef } from './NavigationService'; // Adjust path as needed
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator();
 
 function Navigations() {
+   // usePusher();
     const { isLoggedIn } = useContext(AuthContext);
+ 
+
+      
     console.log("is logged in ",isLoggedIn);
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
 
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
             <Stack.Navigator
                 initialRouteName={isLoggedIn ? 'Home' : 'Login'}
                 screenOptions={{ headerShown: false }}
@@ -66,6 +78,10 @@ function Navigations() {
                 {isLoggedIn ? (
                     <>
                          <Stack.Screen name="Home" component={Home} />
+                         <Stack.Screen name="ProfileDetails" component={ProfileDetails} />
+                         <Stack.Screen name="AddSchedule" component={AddSchedule} />
+                         <Stack.Screen name="AddActivity" component={AddActivity} />
+                         <Stack.Screen name="EditActivity" component={EditActivity} />
                          <Stack.Screen name="AddLead" component={AddLead} />
                          <Stack.Screen name="LeadDetails" component={LeadDetails}/>
                          <Stack.Screen name="CustomerDetails" component={CustomerDetails} />

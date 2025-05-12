@@ -145,7 +145,7 @@ const getTaskList = async (page = 1, searchTerm = '') => {
       />
 
 
-      <CustomFooter  />
+      <CustomFooter isCalls={true} />
 
      </View>
   );
