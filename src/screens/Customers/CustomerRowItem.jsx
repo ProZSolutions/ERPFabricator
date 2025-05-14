@@ -118,7 +118,7 @@ const ContactCard = ({ details }) => {
 
       {/* Bottom Row: View Link Right Aligned */}
       <View className="flex-row justify-end mt-3">
-        <TouchableOpacity className="flex-row items-center" onPress={()=>navigation.navigate('CustomerDetails', { customer: details })}  >
+        <TouchableOpacity className="flex-row items-center" onPress={()=>navigation.navigate('CustomerDetails', { lead: details })}  >
           <Text className="text-blue-600 text-[10px] mr-1">View</Text>
           <FontAwesome name="angle-right" size={16} color="#2563eb" />
         </TouchableOpacity>

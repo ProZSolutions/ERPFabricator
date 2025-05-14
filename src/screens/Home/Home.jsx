@@ -40,19 +40,24 @@ const Home = () => {
 
   useEffect(() => {
     // Only start the service once when the app first loads and service isn't started
-   const initService = async () => {
+const initService = async () => {
     if (Platform.OS === 'android') {
-      const isServiceStarted = await AsyncStorage.getItem(SERVICE_STARTED_KEY);
+      /*const isServiceStarted = await AsyncStorage.getItem(SERVICE_STARTED_KEY);
       if (isServiceStarted !== 'true') {
         console.log("Starting Pusher foreground service...");
-        NativeModules.ForegroundService.startService();
-        await AsyncStorage.setItem(SERVICE_STARTED_KEY, 'true');
-        console.log("Foreground service started.");
+        try {
+          await AsyncStorage.setItem(SERVICE_STARTED_KEY, 'true');
+          console.log("Foreground service started.");
+        } catch (error) {
+          console.error("Error starting service:", error);
+        }
       } else {
         console.log("Foreground service already started.");
-      }
+      } */
+               NativeModules.ForegroundService.startService();
+
     }
-  };
+};
     const getUserDetails = async () => {
       const user = await getValue('userInfo');
 
@@ -121,8 +126,7 @@ const Home = () => {
     4: "CallHIstory",
     5: "TaskList",
     6: "ProfileDetails",
-    7: "ProfileDetails",
-  };
+   };
 
   const myChitNavigations = {
     1: "MyChitList",
@@ -144,10 +148,10 @@ const Home = () => {
 
   const fetchDashboardData = async (user) => {
     if (parseInt(user.role) === 10) {
-      const titles = ["Attendance", "Customers", "Leads", "Calls", "Tasks", "Profile", "Notification"];
+      const titles = ["Attendance", "Customers", "Leads", "Calls", "Tasks", "Profile"];
       const icons = [
         <LiveChitIcon />, <UpcomingChitIcon />, <PendingChitIcon />,
-        <TransactionChitIcon />, <MembersChitIcon />, <ProfitLossIcon />, <LiveChitIcon />
+        <TransactionChitIcon />, <MembersChitIcon />, <ProfitLossIcon />
       ];
       const agentItems = titles.map((title, i) => ({
         id: String(i + 1),

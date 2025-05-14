@@ -5,11 +5,10 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
 
-export default function ActivityCard({ item, isExpanded, onToggle ,close,selectedTab}) {
+export default function ActivityCard({ item, isExpanded, onToggle,onViewDetails  }) {
   const [showReadMore, setShowReadMore] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const navigation = useNavigation();
-  console.log("selectedTab"," as"+selectedTab);
 
 
   if (!item) return null;
@@ -49,34 +48,24 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
     <View className="flex-row bg-gray-100 rounded-2xl shadow-md p-3 mb-4 mx-2 items-start">
       <View className="w-1.5 rounded-full bg-red-500 mr-3" />
       <View className="flex-1 space-y-2">
-        <View className="flex-row items-center space-x-1">
-          {item.mode_communication_name === 'WhatsApp' && (
-            <>
-              <FontAwesome name="whatsapp" size={14} color="green" />
-              <Text className="text-[10px] font-semibold text-gray-800 ml-1">WhatsApp</Text>
-            </>
-          )}
-          {item.mode_communication_name === 'Email' && (
-            <>
-              <MaterialIcons name="email" size={14} color="red" />
-              <Text className="text-[10px] font-semibold text-gray-800 ml-1">Email</Text>
-            </>
-          )}
-          {item.mode_communication_name === 'Direct' && (
-            <>
-              <MaterialIcons name="directions-walk" size={14} color="#555" />
-              <Text className="text-[10px] font-semibold text-gray-800 ml-1">Direct</Text>
-            </>
-          )}
-          {(!item.mode_communication_name || item.mode_communication_name === 'Phone') && (
-            <>
-              <MaterialIcons name="phone" size={14} color="#555" />
-              <Text className="text-[10px] font-semibold text-gray-800 ml-1">Phone Call</Text>
-            </>
-          )}
+      <View className="flex-row w-full justify-between items-start">
+        {/* Left: Lead Name */}
+        <View className="flex-row items-start w-1/2 flex-wrap">
+          <MaterialIcons name="person" size={16} color="#555" />
+          <Text className="text-[12px] font-semibold text-gray-800 ml-1">
+            {item.lead_name}
+          </Text>
         </View>
 
-        {item.content_reply_name ? (
+        {/* Right: Icon Button */}
+        <TouchableOpacity onPress={() => onViewDetails(item)}>
+          <View style={styles.iconCircle}>
+            <MaterialIcons name="visibility" size={12} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+        {item.details ? (
           <Text
             numberOfLines={isExpanded ? undefined : 2}
             onTextLayout={(e) => {
@@ -87,10 +76,10 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
             }}
             className="text-[12px] text-gray-700"
           >
-            {item.content_reply_name}
+            {item.details}
           </Text>
         ) : (
-          <Text className="text-[12px] text-gray-500 ">No message content</Text>
+          <Text className="text-[12px] text-gray-500 ">No Details Found</Text>
         )}
 
         {showReadMore && (
@@ -104,31 +93,16 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
         <View className="flex-row justify-between items-center pt-1 ">
           <View className="flex-row space-x-4">
             <View className="flex-row items-center space-x-1">
-              <FontAwesome name="user-circle" size={14} color="#333" />
-              <Text className="text-[10px] text-gray-800 font-medium">{item.lead_name}</Text>
+              <MaterialIcons name="email" size={14} color="#333" />
+              <Text className="text-[10px] text-gray-800 font-medium">{item.email}</Text>
             </View>
             <View className="flex-row items-center space-x-1">
-              <MaterialIcons name="access-time" size={14} color="#555" />
-              <Text className="text-[10px] text-gray-600">{formattedDate}</Text>
+              <MaterialIcons name="phone" size={14} color="#555" />
+              <Text className="text-[10px] text-gray-600">{item.lead_contact}</Text>
             </View>
           </View>
-
-        {(selectedTab === 'overdue' || (selectedTab === 'all' && item.activity_type !== 'activity')) && (
-              <View className="flex-row items-center space-x-2 pl-2">
-                <TouchableOpacity onPress={() => handleNavigateToSchedule('activity')}>
-                  <View style={styles.iconCircle}>
-                    <MaterialIcons name="calendar-today" size={12} color="white" />
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => handleNavigateToSchedule('schedule')}>
-                  <View style={styles.iconCircle}>
-                    <MaterialIcons name="done" size={12} color="white" />
-                  </View>
-                </TouchableOpacity>
-              </View>
-        )}
-         </View>
+       
+        </View>
       </View>
     </View>
   );

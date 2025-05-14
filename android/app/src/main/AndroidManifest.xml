@@ -58,7 +58,7 @@ package="com.ProZSolutions.erp">
    <service
     android:name=".PusherForegroundService"
     android:foregroundServiceType="dataSync"
-    android:exported="false" />
+     android:exported="false" />
 
 
 

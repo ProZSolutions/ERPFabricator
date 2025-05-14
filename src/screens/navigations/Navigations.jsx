@@ -44,6 +44,7 @@ import UpdateSchedule from '../Tasks/UpdateSchedule';
 import AddSchedule from '../Tasks/AddSchedule';
 import AddActivity from '../Tasks/AddActivity';
 import EditActivity from '../Tasks/EditActivity';
+import EditSchedule from '../Tasks/EditSchedule';
 import CallHIstory from '../CallTracking/CallHistory';
 import LeadList from '../Lead/LeadList';
 import AddLead from '../Lead/AddLead';
@@ -51,6 +52,7 @@ import Customers from '../Customers/Customers';
 import CustomerDetails from '../Customers/CustomerDetails';
 import LeadDetails from '../Lead/LeadDetails';
 import ProfileDetails from '../Profile/ProfileDetails';
+import EditProfile from '../Profile/EditProfile';
 import {usePusher} from '../../usePusher';
 
 import PushNotification from 'react-native-push-notification';
@@ -81,6 +83,8 @@ function Navigations() {
                          <Stack.Screen name="ProfileDetails" component={ProfileDetails} />
                          <Stack.Screen name="AddSchedule" component={AddSchedule} />
                          <Stack.Screen name="AddActivity" component={AddActivity} />
+                         <Stack.Screen name="EditSchedule" component={EditSchedule} />
+                         <Stack.Screen name="EditProfile" component={EditProfile} />
                          <Stack.Screen name="EditActivity" component={EditActivity} />
                          <Stack.Screen name="AddLead" component={AddLead} />
                          <Stack.Screen name="LeadDetails" component={LeadDetails}/>

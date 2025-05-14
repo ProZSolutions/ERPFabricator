@@ -51,6 +51,14 @@ android {
     tasks.named("generateDebugLintReportModel") {
         dependsOn("copyReactNativeVectorIconFonts")
     }
+
+
+
+        sourceSets {
+        main.java.srcDirs += 'src/main/java'
+        main.kotlin.srcDirs += 'src/main/java'
+    }
+
 }
 
 
@@ -70,7 +78,7 @@ dependencies {
 implementation ("com.google.android.gms:play-services-maps:18.2.0")
 implementation ("com.google.maps.android:android-maps-utils:2.3.0")
 implementation ("com.google.android.gms:play-services-location:20.0.0")
-    implementation ("com.pusher:pusher-java-client:2.2.6")
+    implementation ("com.pusher:pusher-java-client:2.4.0") //2.2.6
 
  
  

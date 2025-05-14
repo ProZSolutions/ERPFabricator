@@ -12,11 +12,15 @@ import { useEffect, useState } from 'react';
 import { getDataHRMS, postDataHRMS } from '../../api/ApiHRMSService';
 import { BASE_URL_HRMS } from '../../api/Config';
 import axios from 'axios';
+ import { useNavigation } from '@react-navigation/native';
+
 
 
 
 
 export default function ProfileScreen() {
+    const navigation = useNavigation();
+  
     const [selectedImage, setSelectedImage] = useState(null);
     const [profileData, setProfileData] = useState(null);
       const [loading, setLoading] = useState(false);
@@ -110,8 +114,14 @@ export default function ProfileScreen() {
           const device_id = await AsyncStorage.getItem('device_id');
           const userInfo = await getValue('userInfohrms');  
           const bearerToken = userInfo?.bearer_token; 
+          if(device_id && bearerToken){
           setToken( bearerToken);
           setDeviceID(device_id);
+          fetchProfile();
+
+          }
+         
+          console.log(" token "," sd "+bearerToken+" device id "+device_id);
          } catch (error) {
            return null;
         }finally{
@@ -125,7 +135,7 @@ export default function ProfileScreen() {
       
         const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
         const bearerToken = userInfo?.bearer_token;
-       
+       console.log("fetch profile calling ");
         try {
           const res = await axios.get('https://erphrms.proz.in/api/employee-profile', {
             headers: {
@@ -135,12 +145,13 @@ export default function ProfileScreen() {
               'x-api-key': 'fhyDNulWAg9NzBsLmw4Lf6J47pEhQI37w5rWVu9uF'
             }
           });
+          console.log("profile fetch status ","as "+res.data.status);
       
            if (res.data.status === 'success') {
              setProfileData(res.data.data); // <-- set only the profile object
           }
         } catch (err) {
-            
+            console.log("error "," as "+err);
          }finally{
             setLoading(false);
         }
@@ -158,9 +169,7 @@ export default function ProfileScreen() {
             clearTimeout(handler);
           };
         }, []);
-        useEffect(()=>{
-            fetchProfile();
-        },[deviceid]);
+  
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
@@ -173,6 +182,17 @@ export default function ProfileScreen() {
 
                   )
               }
+              
+                    <View className="flex-row justify-end mt-1">
+                      <TouchableOpacity
+                        className="flex-row items-center rounded-xl bg-blue-600 px-3 py-2 m-2"
+                          onPress={() => navigation.navigate('EditProfile')}
+              
+                      >
+                          <FontAwesome name="lock" size={12} color="#FFFFFF" />
+                        <Text className="text-white text-[10px] ml-1">Change Password</Text>
+                      </TouchableOpacity>
+                    </View>
       <ScrollView className="flex-1 p-4" contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Profile Card */}
         <View className="items-center bg-white rounded-xl p-4 shadow-sm border border-gray-200">

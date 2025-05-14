@@ -187,6 +187,8 @@ const LeadDetailsScreen = ({ route }) => {
             item={item}
             isExpanded={item.uuid === expandedId}
             onToggle={handleToggle}
+            close ={lead.is_closed}
+            selectedTab = {selectedTab}
           />
         )}
       />

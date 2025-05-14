@@ -161,7 +161,7 @@ function AddSchedule({ route }) {
         try {
             const requestPayload = {
                 uuid: lead.uuid,
-                lead_id:lead.id,
+                lead_id:lead.lead_id,
                 file_url: formValues.file_url,
                 update_status: formValues.stage,  // Assuming this holds stage ID
                 notes: formValues.notes,
@@ -439,7 +439,7 @@ function AddSchedule({ route }) {
 
     return (
         <View className="flex-1 bg-white">
-            <CustomHeader name={"Edit Activity "} isBackIcon />
+            <CustomHeader name={"Update Activity "} isBackIcon />
          
                 <Container paddingBottom={110}>
                 <View style={{ marginTop: -15 }}>
@@ -642,11 +642,11 @@ function AddSchedule({ route }) {
 
                     {/* Buttons */}
                     <View className="flex-row justify-between mt-4">
-                        <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.navigate('TaskList')}>
+                        <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.navigate('LeadList')}>
                             <Text className="text-white font-semibold text-sm">Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
-                            <Text className="text-white font-semibold text-sm">Edit Activity</Text>
+                            <Text className="text-white font-semibold text-sm">Update Activity</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
