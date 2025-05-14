@@ -6,12 +6,16 @@ import { AuthProvider,AuthContext  } from './component/AuthContext/AuthContext';
 import { usePusher } from './usePusher';
 import { navigate,navigationRef  } from './screens/navigations/NavigationService'; // Adjust path
 import PushNotification from 'react-native-push-notification';
-
-
+ 
+ 
 function App() {
-  usePusher(); // start as early as possible
-    
-  useEffect(() => {
+  //usePusher(); // start as early as possible
+
+ 
+
+   useEffect(() => {
+ 
+ 
     PushNotification.configure({
       onNotification: function (notification) {
         console.log('Notification opened:', notification);

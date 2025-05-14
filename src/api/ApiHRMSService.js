@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
  
 const api = axios.create({
-    baseURL: 'https://erphrmsts.proz.in/api',
+    baseURL: 'https://erphrms.proz.in/api',
     timeout: 100000,
     headers: {
         'Content-Type': 'application/json',

@@ -72,6 +72,7 @@ const getTaskList = async (page = 1, filters = {}) => {
 
   console.log("token",token_no+" device "+deviceid);
   try {
+    console.log(" come to try ");
     const body = {
       ...filters, // ← flat structure as per Postman body
     };
@@ -109,6 +110,7 @@ const getTaskList = async (page = 1, filters = {}) => {
   } catch (error) {
     console.log('Error fetching task list:', error);
   } finally {
+    console.log(" come to finalle");
     setLoading(false);
   }
 };
@@ -118,6 +120,7 @@ const getTaskList = async (page = 1, filters = {}) => {
        getDeviceId();
   }, []);
   useEffect(() => {
+    console.log("token"," as "+token+" device id "+deviceid);
     if (token && deviceid) {
       getTaskList(1,{});
      }

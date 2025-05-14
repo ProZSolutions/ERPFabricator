@@ -85,7 +85,7 @@ export default function ProfileScreen() {
             type: image.type,
           });
  
-          const response = await fetch('https://erphrmsts.proz.in/api/employee-profile-update', {
+          const response = await fetch('https://erphrms.proz.in/api/employee-profile-update', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${bearerToken}`,
@@ -127,7 +127,7 @@ export default function ProfileScreen() {
         const bearerToken = userInfo?.bearer_token;
        
         try {
-          const res = await axios.get('https://erphrmsts.proz.in/api/employee-profile', {
+          const res = await axios.get('https://erphrms.proz.in/api/employee-profile', {
             headers: {
               'Authorization': `Bearer ${bearerToken}`,
               'device_id': deviceId,

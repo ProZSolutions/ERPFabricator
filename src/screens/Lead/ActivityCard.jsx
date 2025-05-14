@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity,Modal, ToastAndroid } from 'react-native';
+import { View, Text, TouchableOpacity,Modal, ToastAndroid,StyleSheet  } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -100,7 +100,7 @@ export default function ActivityCard({ item, isExpanded, onToggle }) {
           </TouchableOpacity>
         )}
 
-        <View className="flex-row justify-between items-center pt-1">
+        <View className="flex-row justify-between items-center pt-1 ">
           <View className="flex-row space-x-4">
             <View className="flex-row items-center space-x-1">
               <FontAwesome name="user-circle" size={14} color="#333" />
@@ -113,15 +113,38 @@ export default function ActivityCard({ item, isExpanded, onToggle }) {
           </View>
           <View className="flex-row items-center space-x-2 pl-2">
           <TouchableOpacity  onPress={() => handleNavigateToSchedule('schedule')}
->
-            <MaterialIcons name="phone" size={16} color="#555" />
-          </TouchableOpacity>
+          >
+          <View style={styles.iconCircle}>
+            <MaterialIcons name="calendar-today" size={12} color="white" />
+
+          </View>
+                    </TouchableOpacity>
           <TouchableOpacity onPress={() => handleNavigateToSchedule('activity')}> 
-            <MaterialIcons name="done" size={16} color="green" />
-          </TouchableOpacity>
+              <View style={styles.iconCircle}>
+                      <MaterialIcons name="done" size={12} color="white" />
+                    </View>      
+                        </TouchableOpacity>
           </View>
         </View>
       </View>
     </View>
   );
+
+  
+
 }
+const styles = StyleSheet.create({
+  iconRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconCircle: {
+    backgroundColor: 'green',
+    borderRadius: 20, // for a perfect circle
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+

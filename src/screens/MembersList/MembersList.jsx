@@ -150,7 +150,7 @@ function MembersList() {
     let token_no = "Bearer "+token;
  
     try {
-      const response = await fetch('https://erphrmsts.proz.in/api/atten-punchin', {
+      const response = await fetch('https://erphrms.proz.in/api/atten-punchin', {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -224,7 +224,7 @@ function MembersList() {
     let token_no = "Bearer "+token;
  
     try {
-      const response = await fetch('https://erphrmsts.proz.in/api/atten-punchout', {
+      const response = await fetch('https://erphrms.proz.in/api/atten-punchout', {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -269,7 +269,7 @@ function MembersList() {
     formData.append('longitude', longitude.toString());
     console.log("token no ",token_no+" device id "+deviceid);
     try {
-      const response = await fetch('https://erphrmsts.proz.in/api/check-atten', {
+      const response = await fetch('https://erphrms.proz.in/api/check-atten', {
         method: 'POST', // 🔥 changed to POST
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -327,7 +327,7 @@ function MembersList() {
     setLoading(true);
   
     try {
-      const response = await fetch('https://erphrmsts.proz.in/api/atten-list', {
+      const response = await fetch('https://erphrms.proz.in/api/atten-list', {
         method: 'POST', // or 'GET' based on your API config
         headers: {
           'Authorization': token_no,

@@ -10,9 +10,9 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
-//import com.ProZSolutions.erp.PushNotification.WebSocketPackage // 👈 import your package
-
-
+import com.ProZSolutions.erp.ForegroundServicePackage;
+ 
+ 
 
 class MainApplication : Application(), ReactApplication {
 
@@ -20,11 +20,8 @@ class MainApplication : Application(), ReactApplication {
       object : DefaultReactNativeHost(this) {
         override fun getPackages(): List<ReactPackage> =
             PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-              // add(MyReactNativePackage())
+         add(ForegroundServicePackage()) // <-- Register your module
 
-
-           //    add(WebSocketPackage()) 
             }
 
         override fun getJSMainModuleName(): String = "index"

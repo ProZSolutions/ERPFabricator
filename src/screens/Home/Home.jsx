@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import { View, Text, Alert, BackHandler,PermissionsAndroid  } from "react-native";
+import { View, Alert, BackHandler, PermissionsAndroid, Platform, NativeModules } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Geolocation from 'react-native-geolocation-service';
-import PushNotification from 'react-native-push-notification';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CustomHeader from "../../component/Header/CustomHeader";
 import CustomHeading from "../../component/Heading/CustomHeading";
@@ -21,17 +20,12 @@ import MembersChitIcon from "../../assets/svg-component/MembersChitIcon";
 import MyChitIcon from "../../assets/svg-component/MyChitIcon";
 import MyAuctionIcon from "../../assets/svg-component/MyAuctionIcon";
 
-import { getData } from "../../api/ApiService";
-import { getValue, removeValue } from "../../component/AsyncStorage/AsyncStorage";
+import { getValue } from "../../component/AsyncStorage/AsyncStorage";
 import { AuthContext } from "../../component/AuthContext/AuthContext";
-import handleError from "../../component/ErrorHandler/ErrorHandler";
 import { capitalizeFirstLetter } from "../../utils";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import TaskList from "../Tasks/TaskList";
-import  Customers from '../Customers/Customers';
 
-//import Pusher from 'pusher-js/react-native';
-// import echo from "../../websocket";
+// Constants
+const SERVICE_STARTED_KEY = "foreground_service_started";
 
 const Home = () => {
   const navigation = useNavigation();
@@ -41,7 +35,24 @@ const Home = () => {
   const [userDetails, setUserDetails] = useState("");
   const { setUserInfo, isLoggedIn } = useContext(AuthContext);
 
+  // State variable to track if the service has started
+  const [serviceStarted, setServiceStarted] = useState(false);
+
   useEffect(() => {
+    // Only start the service once when the app first loads and service isn't started
+   const initService = async () => {
+    if (Platform.OS === 'android') {
+      const isServiceStarted = await AsyncStorage.getItem(SERVICE_STARTED_KEY);
+      if (isServiceStarted !== 'true') {
+        console.log("Starting Pusher foreground service...");
+        NativeModules.ForegroundService.startService();
+        await AsyncStorage.setItem(SERVICE_STARTED_KEY, 'true');
+        console.log("Foreground service started.");
+      } else {
+        console.log("Foreground service already started.");
+      }
+    }
+  };
     const getUserDetails = async () => {
       const user = await getValue('userInfo');
 
@@ -51,49 +62,35 @@ const Home = () => {
           index: 0,
           routes: [{ name: 'Login' }],
         });
-        return; // Stop execution here
+        return;
       }
-       setUserDetails(user);
+
+      setUserDetails(user);
       fetchDashboardData(user);
-      requestLocationPermission();
+      requestPermissions();
+    };
 
-    }
+    initService();
     getUserDetails();
+  }, [isLoggedIn, serviceStarted]);
 
-  }, [isLoggedIn])
-
-  const requestLocationPermission = async () => {
+  const requestPermissions = async () => {
     if (Platform.OS === 'android') {
       try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-        );
-
-        const notificationGranted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        );
-
-
-
-        return {
-          locationPermission: granted === PermissionsAndroid.RESULTS.GRANTED,
-          notificationPermission: notificationGranted === PermissionsAndroid.RESULTS.GRANTED,
-        };
-       } catch (err) {
-        console.warn(err);
-        return false;
+        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+      } catch (err) {
+        console.warn("Permission error:", err);
       }
     } else {
       try {
         const result = await Geolocation.requestAuthorization('whenInUse');
-        return result === 'granted';
+        console.log("iOS location permission:", result);
       } catch (err) {
-        console.warn(err);
-        return false;
+        console.warn("iOS permission error:", err);
       }
     }
   };
-  
 
   useFocusEffect(
     useCallback(() => {
@@ -103,21 +100,18 @@ const Home = () => {
           {
             text: "YES",
             onPress: async () => {
-              BackHandler.exitApp(); // 👈 This closes the app
-
+              await AsyncStorage.removeItem(SERVICE_STARTED_KEY);
+              setServiceStarted(false);  // Reset service started status
+              BackHandler.exitApp();
             },
           },
         ]);
         return true;
       };
 
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction
-      );
-
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
       return () => backHandler.remove();
-    }, [setUserInfo])
+    }, [])
   );
 
   const navigationMap = {
@@ -149,107 +143,68 @@ const Home = () => {
   };
 
   const fetchDashboardData = async (user) => {
-    console.log("user details:", JSON.stringify(user, null, 2));
- 
-      if(parseInt(user.role)===10){
-        // employee
-        
-        const titles=["Attendance","Customers", "Leads", "Calls", 
-          "Tasks", "Profile", 
-          "Notification"];
-          const icons = [
-            <LiveChitIcon />,
-            <UpcomingChitIcon />,
-            <PendingChitIcon />,
-            <TransactionChitIcon />,
-            <MembersChitIcon />,
-            <ProfitLossIcon />,
-            <LiveChitIcon />
-          ];
-
-          const agentItems = [];
-          for (let i = 0; i < titles.length; i++) {
-            agentItems.push({
-              id: String(i + 1),
-              title: titles[i],
-              notification:  0,
-              icon: icons[i]
-            });
-          }
-          
-          setAgentItem(agentItems);
-      }else{
-        // fabricator
-        const userTitles = [
-          "Customer Management",
-          "Quatation Generation",
-          "Site Measurement",
-          "Work Progress Updates",
-          "Material/Inventory",
-          "Employee Communication"
-        ];
-        
-        const userIcons = [
-          <MyChitIcon />,
-          <TransactionChitIcon />,
-          <MyAuctionIcon />,
-          <MyChitIcon />,
-          <TransactionChitIcon />,
-          <MyAuctionIcon />
-        ];
-        const userItems = [];
-        for (let i = 0; i < userTitles.length; i++) {
-          userItems.push({
-            id: String(i + 1),
-            title: userTitles[i],
-            notification:  0,
-            icon: userIcons[i]
-          });
-        }
-        
-        setMyChitItem(userItems);
-      }  
+    if (parseInt(user.role) === 10) {
+      const titles = ["Attendance", "Customers", "Leads", "Calls", "Tasks", "Profile", "Notification"];
+      const icons = [
+        <LiveChitIcon />, <UpcomingChitIcon />, <PendingChitIcon />,
+        <TransactionChitIcon />, <MembersChitIcon />, <ProfitLossIcon />, <LiveChitIcon />
+      ];
+      const agentItems = titles.map((title, i) => ({
+        id: String(i + 1),
+        title,
+        notification: 0,
+        icon: icons[i],
+      }));
+      setAgentItem(agentItems);
+    } else {
+      const userTitles = [
+        "Customer Management", "Quatation Generation", "Site Measurement",
+        "Work Progress Updates", "Material/Inventory", "Employee Communication"
+      ];
+      const userIcons = [
+        <MyChitIcon />, <TransactionChitIcon />, <MyAuctionIcon />,
+        <MyChitIcon />, <TransactionChitIcon />, <MyAuctionIcon />
+      ];
+      const userItems = userTitles.map((title, i) => ({
+        id: String(i + 1),
+        title,
+        notification: 0,
+        icon: userIcons[i],
+      }));
+      setMyChitItem(userItems);
+    }
   };
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchDashboardData(); 
-
-    }, [])
-  );
 
   return (
     <View className="flex-1 bg-white">
       <CustomHeader name="Home" isLogout={true} />
-      <CustomHeading 
+      <CustomHeading
         title={
-    userDetails?.name
-      ? `Hi, ${capitalizeFirstLetter(userDetails.name)}`
-      : `Hi, ${userDetails?.emp_no ?? ''}`
-  }
-       subTitle="Nice to have you back!" />
+          userDetails?.name
+            ? `Hi, ${capitalizeFirstLetter(userDetails.name)}`
+            : `Hi, ${userDetails?.emp_no ?? ''}`
+        }
+        subTitle="Nice to have you back!"
+      />
       <Container paddingBottom={80}>
         <Spinner visible={loading} textContent="Loading..." />
         <View className="px-4">
-        {userDetails.role === 10 ? (
-          <GridList
-            items={agentItem}
-            handleNavigation={(id) => handleNavigation(id, navigationMap)}
-          />
-        ) : (
-          <GridList
-                items={myChitItem}
-                handleNavigation={(id) => handleNavigation(id, myChitNavigations)}
-              />
-        )}         
-         
+          {userDetails.role === 10 ? (
+            <GridList
+              items={agentItem}
+              handleNavigation={(id) => handleNavigation(id, navigationMap)}
+            />
+          ) : (
+            <GridList
+              items={myChitItem}
+              handleNavigation={(id) => handleNavigation(id, myChitNavigations)}
+            />
+          )}
         </View>
       </Container>
       <CustomFooter isHome={true} />
-
-     </View>
+    </View>
   );
 };
 
 export default Home;
-

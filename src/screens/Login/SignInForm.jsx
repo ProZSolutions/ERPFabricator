@@ -15,6 +15,7 @@ import { AuthContext } from "../../component/AuthContext/AuthContext";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 function SignInForm() {
   const [isChecked, setChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +57,7 @@ function SignInForm() {
 }
 const loginHandler = async () => {
   if (!validateInputs()) return;
+ 
 
   // 📌 Generate or override device_id
   let device_id = generateRandomString(); // <- Make sure this is a **function call**
@@ -92,8 +94,10 @@ const loginHandler = async () => {
     setIsLoading(true);
     const appPayload = { username, password, device_id };
     const appResponse = await postData('/mobilelogin', appPayload);
+          await AsyncStorage.setItem('device_id', device_id);
 
     if (appResponse?.status === 'success') {
+
       console.log('Main App Login Successful:', appResponse);
       await setUserInfo(appResponse);
       navigation.navigate('Home');
