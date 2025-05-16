@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import {
   Alert,
   Pressable,
@@ -24,10 +24,14 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { BASE_URL_HRMS } from '../../api/Config';
  import { postDataHRMS } from '../../api/ApiHRMSService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../component/AuthContext/AuthContext';
+
 
 function EditSchedule({ route }) {
   const { lead } = route.params || {};
   const navigation = useNavigation();
+      const { logout } = useContext(AuthContext);
+  
 
   const [selectedLocation, setSelectedLocation] = useState({
     latitude: 11.2284893,
@@ -89,14 +93,66 @@ const getDeviceId = async () => {
       const handleLogoutAndRedirect = async () => {
   try {
     await AsyncStorage.clear();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
+    logout(); 
   } catch (e) {
     console.error("Error clearing AsyncStorage", e);
   }
 };
+
+
+const getTaskList = async () => {
+      if (!validateForm()) return;
+
+    const token_no = "Bearer " + token;
+
+    console.log("token"," as "+token_no+" device "+deviceId);
+    setLoading(true);
+
+    try {
+  
+      const requestPayload = {
+        current_password: formValues.old,
+        new_password: formValues.new
+      };
+      console.log(JSON.stringify(requestPayload, null, 2));
+ 
+       const userInfoStr = await AsyncStorage.getItem('userInfohrms');
+        const deviceId = await AsyncStorage.getItem('device_id');
+         const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+        const bearerToken = userInfo?.bearer_token;
+       const url = `https://erphrms.proz.in/api/change-password`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+              'device_id': deviceId,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      const result = await response.json();
+      if (response.status === 200 && result.status === 'success') {
+         Alert.alert("Success", "Password Changed Successfully!!!.", [
+          { text: "OK", onPress: () => {
+                    handleLogoutAndRedirect(); // Call separate async function
+
+          }
+            
+          },
+        ]);
+      } else {
+         
+      }
+    } catch (error) {
+      console.error("Error fetching task list", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -110,10 +166,10 @@ const getDeviceId = async () => {
       console.log(JSON.stringify(requestPayload, null, 2));
  
 
-      const response = await postDataHRMS(`${BASE_URL_HRMS}schedule-update`, requestPayload);
+      const response = await postDataHRMS('/change-password', requestPayload);
       console.log("response.status "," "+response.status );
       if (response.status === "success") {
-        Alert.alert("Success", "Reschedule  Submitted Successfully!!!.", [
+        Alert.alert("Success", "Password Changed Successfully!!!.", [
           { text: "OK", onPress: () => {
                     handleLogoutAndRedirect(); // Call separate async function
 
@@ -187,7 +243,7 @@ const getDeviceId = async () => {
                 <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.navigate('ProfileDetails')}>
                   <Text className="text-white font-semibold text-sm">Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
+                <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={getTaskList}>
                   <Text className="text-white font-semibold text-sm">Change Password</Text>
                 </TouchableOpacity>
               </View>

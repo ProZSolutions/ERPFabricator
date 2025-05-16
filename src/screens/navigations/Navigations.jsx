@@ -1,6 +1,7 @@
 import React, { useContext ,useEffect} from 'react';
 import { NavigationContainer,useNavigationContainerRef  } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+ import NoNetwork from '../NoNetwork';
 import Home from '../Home/Home';
 import Login from '../Login/Login';
 import SignUp from '../SignUp/SignUp';
@@ -55,6 +56,8 @@ import ProfileDetails from '../Profile/ProfileDetails';
 import EditProfile from '../Profile/EditProfile';
 import {usePusher} from '../../usePusher';
 
+
+
 import PushNotification from 'react-native-push-notification';
 import { navigationRef } from './NavigationService'; // Adjust path as needed
 
@@ -65,7 +68,7 @@ const Stack = createNativeStackNavigator();
 function Navigations() {
    // usePusher();
     const { isLoggedIn } = useContext(AuthContext);
- 
+    
 
       
     console.log("is logged in ",isLoggedIn);
@@ -77,8 +80,11 @@ function Navigations() {
                 initialRouteName={isLoggedIn ? 'Home' : 'Login'}
                 screenOptions={{ headerShown: false }}
             >
+
+
                 {isLoggedIn ? (
                     <>
+ 
                          <Stack.Screen name="Home" component={Home} />
                          <Stack.Screen name="ProfileDetails" component={ProfileDetails} />
                          <Stack.Screen name="AddSchedule" component={AddSchedule} />
@@ -130,6 +136,7 @@ function Navigations() {
                     </>
                 ) : (
                     <>
+ 
                         <Stack.Screen name="Login" component={Login} />
                         <Stack.Screen name="SignUp" component={SignUp} />
                         <Stack.Screen name="Home" component={Home} />

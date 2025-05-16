@@ -23,11 +23,15 @@ import MyAuctionIcon from "../../assets/svg-component/MyAuctionIcon";
 import { getValue } from "../../component/AsyncStorage/AsyncStorage";
 import { AuthContext } from "../../component/AuthContext/AuthContext";
 import { capitalizeFirstLetter } from "../../utils";
+import NetInfo from "@react-native-community/netinfo";
+
 
 // Constants
 const SERVICE_STARTED_KEY = "foreground_service_started";
 
 const Home = () => {
+  const [isConnected, setIsConnected] = useState(true);
+  const [retryKey, setRetryKey] = useState(0);
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [agentItem, setAgentItem] = useState([]);
@@ -37,6 +41,12 @@ const Home = () => {
 
   // State variable to track if the service has started
   const [serviceStarted, setServiceStarted] = useState(false);
+
+
+  
+
+
+
 
   useEffect(() => {
     // Only start the service once when the app first loads and service isn't started

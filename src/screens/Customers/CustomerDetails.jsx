@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Pressable, FlatList, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, FlatList, Alert,ActivityIndicator } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import CustomHeader from '../../component/Header/CustomHeader';
 import CustomFooter from '../../component/Footer/CustomFooter';
@@ -21,6 +21,7 @@ const CustomerDetails = ({ route }) => {
   const [expandedId, setExpandedId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigation = useNavigation();
+  
 
   const handleToggle = (uuid) => {
     setExpandedId(prev => (prev === uuid ? null : uuid));
@@ -144,6 +145,9 @@ const CustomerDetails = ({ route }) => {
               onViewDetails={handleViewDetails} // pass handler here
           />
         )}
+         ListFooterComponent={loading ? (
+                  <ActivityIndicator size="small" color="#0000ff" className="my-2" />
+                ) : null}
       />
 
       <ProductDetailsModal visible={showModal} onClose={() => setShowModal(false)} item={modalDet} />

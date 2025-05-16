@@ -13,8 +13,10 @@ import {postDataHRMS} from "../../api/ApiHRMSService";
 import Spinner from "../../component/Spinner/Spinner";
 import { AuthContext } from "../../component/AuthContext/AuthContext";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+ 
 
 function SignInForm() {
   const [isChecked, setChecked] = useState(false);
@@ -25,6 +27,7 @@ function SignInForm() {
   const [passwordError, setPasswordError] = useState("");
   const navigation = useNavigation();
   const { setUserInfo } = useContext(AuthContext);
+  const [device,setDevice]= useState(null);
   const { setUserInfoHRMS } = useContext(AuthContext);
 
   const validateInputs = () => {
@@ -55,52 +58,98 @@ function SignInForm() {
     }
     return result;
 }
+
+const sampleLogin = async (ndevice_id) => {
+  const device = ndevice_id; // Make sure ndevice_id is passed correctly
+  try {
+    setIsLoading(true);
+
+    const requestPayload = {
+      username: username,
+      password: password,
+      device_id: device
+    };
+
+    console.log("Sending login payload:", JSON.stringify(requestPayload, null, 2));
+
+    const url = `https://erphrms.proz.in/api/login`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'device_id': device || '',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestPayload),
+    });
+
+    const result = await response.json();
+
+    if (response.status === 200 && result.status === 'success') {
+      await setUserInfoHRMS(result);
+
+      if (device) {
+        await AsyncStorage.setItem('device_id', device);
+        console.log('Device ID saved to AsyncStorage:', device);
+      } else {
+        console.warn('Device ID is null or undefined. Skipping save.');
+      }
+
+      navigation.navigate('Home');
+    } else {
+      console.warn('HRMS Login Failed:', result.message || 'Unknown error');
+    }
+  } catch (error) {
+    console.error("Error fetching task list", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 const loginHandler = async () => {
   if (!validateInputs()) return;
  
 
   // 📌 Generate or override device_id
   let device_id = generateRandomString(); // <- Make sure this is a **function call**
-  if (username === 'AV-001') {
+
+  const storedId = await AsyncStorage.getItem('device_id');
+    if (storedId !== null) {
+      device_id =storedId;
+    }
+
+
+
+// let device_id =DeviceInfo.getUniqueId();
+
+ // device_id="3Z1n";
+        setDevice(device_id);
+
+ /* if (username === 'AV-001') {
     device_id = 'axxx';
   } else if (username === 'AV-02') {
     device_id = 'sdgs';
-  }
+  }  */
 
   console.log("Generated Device ID:", device_id);
 
   // ✅ Step 1: Login to HRMS
-  try {
-    const hrmsPayload = { username, password, device_id };
-    const hrmsResponse = await postDataHRMS('/login', hrmsPayload);
-
-    if (hrmsResponse?.status === 'success') {
-      console.log('HRMS Login Successful:', hrmsResponse);
-      await setUserInfoHRMS(hrmsResponse);
-    } else {
-      console.warn('HRMS Login Failed:', hrmsResponse?.message);
-    }
-
-    // Save device ID (once is enough)
-    await AsyncStorage.setItem('device_id', device_id);
-    console.log('Device ID saved to AsyncStorage:', device_id);
-
-  } catch (error) {
-    console.error('HRMS Login Error:', error);
-    // optional: show an error or silently continue
-  }
-
+  
    try {
     setIsLoading(true);
     const appPayload = { username, password, device_id };
     const appResponse = await postData('/mobilelogin', appPayload);
           await AsyncStorage.setItem('device_id', device_id);
+          setDevice(device_id);
 
     if (appResponse?.status === 'success') {
 
       console.log('Main App Login Successful:', appResponse);
       await setUserInfo(appResponse);
-      navigation.navigate('Home');
+      sampleLogin(device_id);
+     // await setUserInfoHRMS(hrmsResponse);
+
     } else {
       Alert.alert('Login failed', appResponse?.message || 'Unknown error');
     }

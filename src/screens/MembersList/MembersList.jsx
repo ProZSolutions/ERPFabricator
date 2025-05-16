@@ -111,6 +111,7 @@ function MembersList() {
  
 
   const takePicture = async () => {
+    console.log("take pickture calling ");
     if (camera.current) {
       const options = { quality: 0.5, base64: true };
       const data = await camera.current.takePictureAsync(options);
@@ -125,6 +126,8 @@ function MembersList() {
         console.log("Token or Device ID not found");
       }
 
+    }else{
+      console.log(" come to camera else part ");
     }
   };
   const handleCheckIn = async () => {
@@ -259,7 +262,7 @@ function MembersList() {
   };
 
   const checkAttendanceStatus = async () => {
-  
+    console.log(" check attendance page called ");
   
     let token_no = "Bearer " + token;
     setLoading(true);
@@ -281,9 +284,10 @@ function MembersList() {
       });
   
       const data = await response.json();
-      console.log('Check Attendance Response:', data);
+      console.log('Check Attendance Response:', data+" response "+response.status);
   
       if (response.status === 200 && data.status === 'success') {
+        setLoading(false);
         const punchStatusFromApi = data.data.punch_status;
         const syncIdFromApi = data.data.sync_id;
   
@@ -294,11 +298,13 @@ function MembersList() {
           console.log('Saved sync_id:', syncIdFromApi);
         }
       } else {
+        setLoading(false);
         console.log('Attendance check failed:', data.message || 'Unknown error');
         Alert.alert('Error', data.message || 'Attendance check failed.');
       }
   
     } catch (error) {
+      setLoading(false);
       console.log('Error checking attendance:', error);
       Alert.alert('Error', 'Network or server error.');
     } finally {

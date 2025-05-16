@@ -228,6 +228,30 @@
         }
       }
     },
+    "react-native-device-info": {
+      "root": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-device-info",
+      "name": "react-native-device-info",
+      "platforms": {
+        "ios": {
+          "podspecPath": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-device-info\\RNDeviceInfo.podspec",
+          "version": "14.0.4",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-device-info\\android",
+          "packageImportPath": "import com.learnium.RNDeviceInfo.RNDeviceInfo;",
+          "packageInstance": "new RNDeviceInfo()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "D:/React_Native/ERPFabricator/node_modules/react-native-device-info/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-geolocation-service": {
       "root": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-geolocation-service",
       "name": "react-native-geolocation-service",
@@ -489,6 +513,30 @@
           "buildTypes": [],
           "componentDescriptors": [],
           "cmakeListsPath": "D:/React_Native/ERPFabricator/node_modules/react-native-sound/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-splash-screen": {
+      "root": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-splash-screen",
+      "name": "react-native-splash-screen",
+      "platforms": {
+        "ios": {
+          "podspecPath": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-splash-screen\\react-native-splash-screen.podspec",
+          "version": "3.3.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-splash-screen\\android",
+          "packageImportPath": "import org.devio.rn.splashscreen.SplashScreenReactPackage;",
+          "packageInstance": "new SplashScreenReactPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "D:/React_Native/ERPFabricator/node_modules/react-native-splash-screen/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
