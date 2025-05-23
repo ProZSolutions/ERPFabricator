@@ -32,8 +32,27 @@ const SearchModal = ({ visible, onClose ,onSearch}) => {
   };
 
   const handleClear = () => {
-    setFormValues({ from: '', to: '', task_type: '', type: '',search:'' });
+ const clearedValues = {
+    from: '',
+    to: '',
+    task_type: '',
+    type: '',
+    search: ''
   };
+
+  setFormValues(clearedValues);
+
+  // Prepare payload with formatted empty values
+  const formattedPayload = {
+    ...clearedValues,
+    from: '',
+    to: ''
+  };
+
+  // Call the search API with cleared filters
+  onSearch(formattedPayload);
+
+  onClose();  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -62,7 +81,7 @@ const SearchModal = ({ visible, onClose ,onSearch}) => {
             placeholder="Select"
             options={[
               { label: 'Assigned', value: 'assigned' },
-              { label: 'Scheduled', value: 'scheduled' },
+              { label: 'Scheduled', value: 'schedule' },
             ]}
             value={formValues.task_type}
             onValueChange={(value) => handleValueChange('task_type', value)}

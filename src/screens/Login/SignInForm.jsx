@@ -50,7 +50,7 @@ function SignInForm() {
     return isValid;
   };
 
-  function generateRandomString(length = 4) {
+  function generateRandomString(length = 10) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
@@ -112,13 +112,18 @@ const loginHandler = async () => {
  
 
   // 📌 Generate or override device_id
-  let device_id = generateRandomString(); // <- Make sure this is a **function call**
+   // <- Make sure this is a **function call**
+    let device_id1 =DeviceInfo.getUniqueId();
+    let device_id = device_id1._j;
+    if(device_id===null){
+      device_id = generateRandomString(); 
+    }
 
   const storedId = await AsyncStorage.getItem('device_id');
     if (storedId !== null) {
       device_id =storedId;
     }
-
+    console.log(" device  id as "+device_id+" stored id "+storedId);
 
 
 // let device_id =DeviceInfo.getUniqueId();
@@ -135,6 +140,7 @@ const loginHandler = async () => {
   console.log("Generated Device ID:", device_id);
 
   // ✅ Step 1: Login to HRMS
+  
   
    try {
     setIsLoading(true);
@@ -180,9 +186,13 @@ const loginHandler = async () => {
           value={username}
           onChangeText={(text) => {
        const filteredText = text
-        .toUpperCase() // convert to uppercase
-        .replace(/[^A-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, ''); // allow only A-Z, 0-9, symbols
-         setUsername(filteredText);
+      .toUpperCase()
+      .replace(/[^A-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, '');
+
+    // Only update if value has changed to avoid redundant re-renders
+    if (filteredText !== username) {
+      setUsername(filteredText);
+    }
     }}
            errorMessage={usernameError}
           editable={true}

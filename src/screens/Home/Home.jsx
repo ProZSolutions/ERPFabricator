@@ -24,6 +24,9 @@ import { getValue } from "../../component/AsyncStorage/AsyncStorage";
 import { AuthContext } from "../../component/AuthContext/AuthContext";
 import { capitalizeFirstLetter } from "../../utils";
 import NetInfo from "@react-native-community/netinfo";
+import DeviceInfo from 'react-native-device-info';
+import NetworkChecker from './NetworkChecker';
+
 
 
 // Constants
@@ -46,9 +49,15 @@ const Home = () => {
   
 
 
+ const handleRetry = () => {
+    // Retry your API call or logic here
+    console.log('Retry pressed - try to reconnect');
+  };
 
 
   useEffect(() => {
+    let device_id1 =DeviceInfo.getUniqueId();
+    console.log("getting device  id "+device_id1._j+" unique id "+DeviceInfo.getDeviceId);
     // Only start the service once when the app first loads and service isn't started
 const initService = async () => {
     if (Platform.OS === 'android') {
@@ -216,6 +225,8 @@ const initService = async () => {
           )}
         </View>
       </Container>
+            <NetworkChecker onRetry={handleRetry} />
+
       <CustomFooter isHome={true} />
     </View>
   );

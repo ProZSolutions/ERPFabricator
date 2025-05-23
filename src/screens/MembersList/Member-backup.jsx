@@ -3,11 +3,11 @@ import { StyleSheet, View, Text, TouchableOpacity, Alert, Platform ,Image,Activi
 import { useNavigation } from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
 import { PermissionsAndroid } from 'react-native';
- import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RNCamera } from 'react-native-camera';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getValue, removeValue } from "../../component/AsyncStorage/AsyncStorage";
 import CustomFooter from '../../component/Footer/CustomFooter';
 
-import { launchCamera } from 'react-native-image-picker';
 
 import CustomHeader from '../../component/Header/CustomHeader';
 import Container from '../../component/Container/Container';
@@ -15,7 +15,7 @@ import { styled } from 'nativewind';
 import AttendanceRow from '../MembersList/AttendanceRow';
 
 import moment from 'moment';
-import {check, request, PERMISSIONS,RESULTS,} from 'react-native-permissions';
+
 
 
 const StyledView = styled(View);
@@ -51,69 +51,6 @@ function MembersList() {
   const timer = setTimeout(() => setCameraReady(true), 500);
   return () => clearTimeout(timer);
 }, []);
- const requestCameraPermission = async () => {
-    let permission;
-
-    if (Platform.OS === 'android') {
-      permission = PERMISSIONS.ANDROID.CAMERA;
-    } else if (Platform.OS === 'ios') {
-      permission = PERMISSIONS.IOS.CAMERA;
-    } else {
-      Alert.alert('Unsupported Platform');
-      return false;
-    }
-
-    const result = await check(permission);
-    if (result === RESULTS.GRANTED) {
-      return true;
-    } else if (result === RESULTS.DENIED) {
-      const reqResult = await request(permission);
-      return reqResult === RESULTS.GRANTED;
-    } else if (result === RESULTS.BLOCKED) {
-      Alert.alert(
-        'Permission Blocked',
-        'Camera permission is blocked. Please enable it from settings.',
-        [{ text: 'OK' }]
-      );
-      return false;
-    }
-    return false;
-  };
-   const openFrontCamera = async () => {
-      const hasPermission = await requestCameraPermission();
-      if (!hasPermission) {
-        Alert.alert('Camera Permission Required', 'Cannot open camera without permission.');
-        return;
-      }
-  
-      launchCamera(
-        {
-          mediaType: 'photo',
-          cameraType: 'front', // Force front camera
-          quality: 1,
-          saveToPhotos: true,
-        },
-        (response) => {
-          if (response.didCancel) {
-            console.log('User cancelled camera');
-          } else if (response.errorCode) {
-            console.log('Camera error:', response.errorMessage);
-            Alert.alert('Camera error', response.errorMessage);
-          } else {
-            if (response.assets && response.assets.length > 0) {
-              setUri(response.assets[0].uri);
-                 if (token && deviceid) {
-                 console.log("Token and Device ID fetched, calling checkAttendanceStatus");
-                //  checkAttendanceStatus();
-                } else {
-                  console.log("Token or Device ID not found");
-                }
-            }
-          }
-        }
-      );
-    };
-
 
   const getCurrentLocation = async () => {
     console.log('Get current location called', Platform.OS);
@@ -179,7 +116,26 @@ function MembersList() {
   };
  
 
- 
+  const takePicture = async () => {
+    console.log("take pickture calling ");
+    if (camera.current) {
+      const options = { quality: 0.5, base64: true };
+      const data = await camera.current.takePictureAsync(options);
+      console.log(data.uri);  // This is the path of the image
+      //console.log(data.base64);  // This is the base64 encoded image string
+      setUri(data.uri);
+      setEncode(data.base64);
+      if (token && deviceid) {
+        console.log("Token and Device ID fetched, calling checkAttendanceStatus");
+        checkAttendanceStatus();
+      } else {
+        console.log("Token or Device ID not found");
+      }
+
+    }else{
+      console.log(" come to camera else part ");
+    }
+  };
   const handleCheckIn = async () => {
     if (!uri) {
       Alert.alert('Error',  'Capture Image for Attendance');
@@ -221,22 +177,27 @@ function MembersList() {
           if (syncId) {   
               try {
                 await AsyncStorage.setItem('syncId', syncId);
-               } catch (error) {
-               }
+                console.log('Device ID saved:', syncId);
+              } catch (error) {
+                console.error('Error saving device ID:', error);
+              }
           } 
           Alert.alert('Success', 'Check In Successful!', [
             { text: 'OK', onPress: () => navigation.navigate('Home') }
           ]);
         } else {
-          Alert.alert('Error', 'Something went wrong.');
+          Alert.alert('Error', data.message || 'Something went wrong.');
         }
       } else {
-        const errorMessage = 'Something went wrong.';
+        const errorMessage = data.message || data.error || 'Something went wrong.';
         Alert.alert('Error', errorMessage);
       }
   
+      // You can clear uri or navigate after success
+      // setUri(null);
+  
     } catch (error) {
-        Alert.alert('Error', error);
+      console.log('Error uploading:', error);
     }finally{
       setLoading(false);
     }
@@ -312,7 +273,9 @@ function MembersList() {
     let token_no = "Bearer " + token;
     setLoading(true);
   
-     
+    const formData = new FormData();
+    formData.append('latitude', latitude.toString());
+    formData.append('longitude', longitude.toString());
     console.log("token no ",token_no+" device id "+deviceid);
     try {
       const response = await fetch('https://erphrms.proz.in/api/check-atten', {
@@ -323,10 +286,12 @@ function MembersList() {
           'device_id': deviceid,
           'Accept': 'application/json', // 🔥 add this to force JSON return
         },
-       });
+        body: formData,
+      });
   
       const data = await response.json();
-      console.log("get attendance atat ",JSON.stringify(data));
+      console.log('Check Attendance Response:', data+" response "+response.status);
+  
       if (response.status === 200 && data.status === 'success') {
         setLoading(false);
         const punchStatusFromApi = data.data.punch_status;
@@ -363,8 +328,6 @@ function MembersList() {
       const bearerToken = userInfo?.bearer_token; 
       setToken( bearerToken);
       setDeviceID(device_id);
-      if(token && device_id){
-      }
       console.log("token",bearerToken+" device id "+device_id);
     } catch (error) {
       console.error('Error fetching device ID:', error);
@@ -398,7 +361,6 @@ function MembersList() {
           pin_work_location: list.pin_work_location[index] || '-',
           pout_work_location: list.pout_work_location[index] || '-',
         }));
-        console.log(" uri as "+uri);
   
         setAttendanceData(transformedData);
       } else {
@@ -426,7 +388,6 @@ function MembersList() {
   useEffect(() => {
     if (token && deviceid) {
       fetchAttendanceData();
-      checkAttendanceStatus();
     }
   }, [token, deviceid]);
 
@@ -488,58 +449,91 @@ function MembersList() {
 
 
 
-      {!uri ? (
-        <StyledView className="w-full p-4 bg-white rounded-lg">
-          {/* Other content above the button (if any) */}
+       
+        {uri == null ? (
+          
+          <StyledView style={{ height: 400, borderRadius: 10, overflow: 'hidden',alignContent:'center',alignSelf:'center',alignSelf:'center' }}>
+          <>  
+              <RNCamera
+                ref={camera}
+                style={stylesss.preview}
+                type={RNCamera.Constants.Type.front}
+                flashMode={RNCamera.Constants.FlashMode.off}
+                androidCameraPermissionOptions={{
+                  title: 'Permission to use camera',
+                  message: 'We need your permission to use your camera',
+                  buttonPositive: 'Ok',
+                  buttonNegative: 'Cancel',
+                }}
+                 notAuthorizedView={
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                      <Text>Camera not authorized</Text>
+                    </View>
+                }
+                pendingAuthorizationView={
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                }
+                 onCameraReady={() => console.log('Camera Ready')}
+                  onStatusChange={({ cameraStatus }) => console.log('Camera Status:', cameraStatus)}
+              />
+               
 
-          <StyledTouchableOpacity 
-            className="mt-auto items-center py-3 px-6 bg-blue-500 rounded-lg"
-            onPress={openFrontCamera}
-          >
-            <StyledText className="text-sm font-semibold text-white">
-              Capture Image
-            </StyledText>
-          </StyledTouchableOpacity>
-          <Text style={{color:'black',fontSize:12,alignSelf:'center',marginTop:3}}>Capture Front View Image</Text>
-        </StyledView>
+               <StyledView className="flex-row justify-center items-center space-x-4 mt-4">
+                  <StyledTouchableOpacity 
+                    className="flex-1 items-center py-3 bg-blue-500 rounded-lg" 
+                    onPress={takePicture}
+                  >
+                    <StyledText className="text-sm font-semibold text-white">
+                      Capture Image
+                    </StyledText>
+                  </StyledTouchableOpacity>
+                </StyledView>
 
-  
-) : (
-  <>
-    <StyledView className="flex items-center justify-center mt-4 w-full">
-      <Image
-        source={{ uri: uri }}
-        style={{ width: 200, height: 200, borderRadius: 10 }}
-        resizeMode="cover"
-      />
-    </StyledView>
 
-    {loading && (
-      <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center z-10">
-        <ActivityIndicator size="large" color="#335ec7" />
-      </View>
-    )}
+              </>
+              </StyledView>
 
-    <StyledView className="flex-row justify-center items-center space-x-4 mt-4">
-      <StyledTouchableOpacity
-        className={`flex-1 items-center py-3 ${punchStatus === 1 ? 'bg-gray-400' : 'bg-blue-500'} rounded-lg`}
-        disabled={punchStatus === 1}
-        onPress={handleCheckIn}
-      >
-        <StyledText className="text-sm font-semibold text-white">Check In</StyledText>
-      </StyledTouchableOpacity>
+              ) : (
+                <>
+                <StyledView className="flex items-center justify-center mt-4 w-full">
+  <Image
+    source={{ uri: uri }}
+    style={{ width: 200, height: 200, borderRadius: 10 }}
+    resizeMode="cover"
+  />
+</StyledView>
 
-      <StyledTouchableOpacity
-        className={`flex-1 items-center py-3 ${punchStatus === 0 ? 'bg-gray-400' : 'bg-blue-500'} rounded-lg`}
-        disabled={punchStatus === 0}
-        onPress={handleCheckOut}
-      >
-        <StyledText className="text-sm font-semibold text-white">Check Out</StyledText>
-      </StyledTouchableOpacity>
-    </StyledView>
-  </>
-)}
+             {loading && (
+              <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center z-10 ">
+                    <ActivityIndicator size="large" color="#335ec7" />
+              </View>
 
+                  )
+              }
+                <StyledView className="flex-row justify-center items-center space-x-4 mt-4">
+                  <StyledTouchableOpacity className={`flex-1 items-center py-3 ${punchStatus === 1 ? 'bg-gray-400' : 'bg-blue-500'}
+                   rounded-lg`} 
+                   disabled={punchStatus === 1}   // 👈 Disable if punchStatus is 1
+                   onPress={handleCheckIn}>
+                        <StyledText className={`text-sm font-semibold text-white`} >
+                          Check In
+                        </StyledText>
+                  </StyledTouchableOpacity>
+
+                  <StyledTouchableOpacity className={`flex-1 items-center py-3 
+                  ${punchStatus === 0 ? 'bg-gray-400' : 'bg-blue-500'} rounded-lg`} 
+                  disabled={punchStatus === 0}   // 👈 Disable if punchStatus is 1
+                  onPress={handleCheckOut}>
+                        <StyledText className={`text-sm font-semibold text-white`} >
+                          Check Out
+                        </StyledText>
+                  </StyledTouchableOpacity>
+
+                 </StyledView>
+                </>
+              )}
 
                
      </StyledView>

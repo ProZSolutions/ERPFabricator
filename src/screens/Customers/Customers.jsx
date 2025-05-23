@@ -50,10 +50,8 @@ const closeSearchModal = () => setModalVisible(false);
       const bearerToken = userInfo?.bearer_token; 
       setToken( bearerToken);
       setDeviceID(device_id);
-      console.log("token",bearerToken+" device id "+device_id);
-    } catch (error) {
-      console.error('Error fetching device ID:', error);
-      return null;
+     } catch (error) {
+       return null;
     }
   };
   const handleInputSearchChange = (value) => {
@@ -65,8 +63,7 @@ const getTaskList = async (page = 1) => {
     const token_no = "Bearer " + token;
     setLoading(true);
   
-    console.log("token", token_no + " device " + deviceid);
-  
+   
     try {
       const url = `${BASE_URL_TESTING}customer?page=${page}&search=${search}`;
   
@@ -80,8 +77,7 @@ const getTaskList = async (page = 1) => {
       });
   
       const result = await response.json();
-      console.log('Task List Response:', result);
-  
+   
       if (response.status === 200 && result.status === 'success') {
         const data = result.data;
         if (page === 1) {
@@ -92,11 +88,11 @@ const getTaskList = async (page = 1) => {
         setCurrentPage(data.current_page);
         setLastPage(data.last_page);
       } else {
-        console.warn('Task list fetch failed:', result.message);
-      }
+          Alert.alert('Error', data.message || 'Something went wrong.');
+       }
     } catch (error) {
-      console.log('Error fetching task list:', error);
-    } finally {
+       const errorMessage = data.message || data.error || 'Something went wrong.';
+     } finally {
       setLoading(false);
     }
   };
@@ -125,7 +121,11 @@ const getTaskList = async (page = 1) => {
       <CustomHeader name="Customer List" isBackIcon={true} />
       <SearchInputBox value={search} onChangeText={handleInputSearchChange}  />
 
-    
+      {tasks.length === 0 && !loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
+          No list found
+        </Text>
+      ) : (
       <FlatList style={{marginTop:10,marginBottom:70}}
         data={tasks}
         keyExtractor={(item) => item.uuid}
@@ -144,10 +144,10 @@ const getTaskList = async (page = 1) => {
         }}
         onEndReachedThreshold={0.5}
       />
-
+      )}
         
 
-      <CustomFooter  />
+      <CustomFooter  isHome={true}/>
 
      </View>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState,useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, Platform ,Image,ActivityIndicator,FlatList} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
@@ -11,6 +11,7 @@ import SearchInputBox from '../../component/SearchDisable/SearchDisable';
 import TaskItemRow from '../../screens/Tasks/TaskItemRow';
 import { BASE_URL_TESTING } from '../../api/Config';
 import SearchModal from './SearchModal';
+import { useFocusEffect } from '@react-navigation/native';
 
 import CustomHeader from '../../component/Header/CustomHeader';
  import { styled } from 'nativewind';
@@ -44,7 +45,12 @@ const [expandedTaskId, setExpandedTaskId] = useState(null);
   const [tasks, setTasks] = useState([]);
 
   
-
+  useFocusEffect(
+    useCallback(() => {
+      // Your refresh logic here
+      getTaskList(1,{});
+    }, [token,deviceid])
+  );
 
  
  
@@ -70,6 +76,9 @@ const getTaskList = async (page = 1, filters = {}) => {
   const token_no = "Bearer " + token;
   setLoading(true);
 
+  if(page==1){
+    setTasks([]);
+  }
   console.log("token",token_no+" device "+deviceid);
   try {
     console.log(" come to try ");
@@ -132,9 +141,13 @@ const getTaskList = async (page = 1, filters = {}) => {
     <View className="flex-1 bg-white">
       <CustomHeader name="Task List" isBackIcon={true} />
       <SearchInputBox value={search} onChangeText={handleInputSearchChange} onPress={openSearchModal}/>
+ {tasks.length === 0 && !loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
+          No list found
+        </Text>
+      ) : (
 
-
-      <FlatList style={{marginTop:10,marginBottom:70}}
+       <FlatList style={{marginTop:10,marginBottom:70}}
         data={tasks}
         keyExtractor={(item) => item.uuid}
         renderItem={({ item }) => (
@@ -159,7 +172,8 @@ onPress={() => {
         }}
         onEndReachedThreshold={0.5}
       />
-
+         )}
+ 
        <SearchModal
           visible={isModalVisible}
           onClose={closeSearchModal}

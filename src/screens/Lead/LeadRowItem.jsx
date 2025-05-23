@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 const ContactCard = ({ details }) => {
   const navigation = useNavigation();
 
-
+   
     const colors = [
         'bg-red-200',
         'bg-green-200',

@@ -4,6 +4,7 @@ const isImage = (url) => {
     return /\.(jpeg|jpg|gif|png|webp)$/i.test(url);
   };
 export default TaskItem = ({ item, isExpanded, onPress }) => {
+  console.log("Expandable View "," as "+JSON.stringify(item));
   return (
     <TouchableOpacity
       onPress={onPress}

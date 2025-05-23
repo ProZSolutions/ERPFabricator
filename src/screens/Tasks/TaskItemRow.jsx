@@ -1,19 +1,23 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable,TouchableOpacity,StyleSheet } from 'react-native';
 import { CalendarIcon } from 'react-native-heroicons/outline';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React, { useRef, useEffect } from 'react';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 let currentlyOpenSwipeable = null;
 
 const StockAlertItem = ({ name, dueDate, status, details }) => {
   const navigation = useNavigation();
   const swipeableRef = useRef(null);
-
-  let isCompleted = status === 1;
+  let disname =null;
+   let isCompleted = status === 1;
   if (details.task_type === 'assigned') {
     isCompleted = status === 1 && details.is_update === 1;
+    disname = details?.task_name;
+  }else{
+    disname = details?.lead_name+"("+details?.lead_leadid+")";
   }
 
   const handlePress = () => {
@@ -29,6 +33,13 @@ const StockAlertItem = ({ name, dueDate, status, details }) => {
     }, 100); // small delay to ensure close animation completes
   };
 
+  const handleRoute =()=>{
+    if (details.task_type === 'assigned') {
+        navigation.navigate('UpdateAssigned', { lead:details });
+      } else {
+        navigation.navigate('EditActivity', { details });
+      }
+  }
   const renderRightActions = () => {
     const actionLabel = isCompleted ? 'Details' : 'Update';
 
@@ -60,12 +71,8 @@ const StockAlertItem = ({ name, dueDate, status, details }) => {
   }, []);
 
   return (
-    <Swipeable
-      ref={swipeableRef}
-      onSwipeableOpen={handleSwipeOpen}
-      renderRightActions={renderRightActions}
-    >
-      <Pressable className="bg-white shadow-md rounded-xl p-4 mb-4 mx-2">
+  
+      <Pressable className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 m-1">
         {/* Task Type Label */}
         <View className="mb-2">
           {details.task_type === 'assigned' ? (
@@ -83,7 +90,7 @@ const StockAlertItem = ({ name, dueDate, status, details }) => {
 
         {/* Title and Status */}
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-[13px] font-semibold text-gray-800">{name}</Text>
+          <Text className="text-[13px] font-semibold text-gray-800">{disname}</Text>
           <View
             className={`px-2 py-1 rounded-md ${
               isCompleted ? 'bg-green-100' : 'bg-yellow-100'
@@ -106,9 +113,41 @@ const StockAlertItem = ({ name, dueDate, status, details }) => {
             <Text className="text-[12px] text-gray-600">Due Days: {dueDate}</Text>
           </View>
         </View>
+            <View className="flex-row justify-end mt-3">
+                  { (details?.is_completed ===0) && (
+                          <View className="flex-row items-center space-x-2 pl-2 mr-2">          
+            
+                            <TouchableOpacity onPress={handleRoute}>
+                              <View style={styles.iconCircle}>
+                                <MaterialIcons name="note-add" size={12} color="white" />
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                    )}
+                    { (details?.is_completed ===1) && (
+                <TouchableOpacity className="flex-row items-center" onPress={handlePress} >
+                  <View style={styles.iconCircle}>
+                                <MaterialIcons name="visibility" size={12} color="white" />
+                              </View>
+                </TouchableOpacity>
+                  )}
+              </View>
       </Pressable>
-    </Swipeable>
-  );
+   );
 };
 
 export default StockAlertItem;
+const styles = StyleSheet.create({
+  iconRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconCircle: {
+    backgroundColor: 'green',
+    borderRadius: 20, // for a perfect circle
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

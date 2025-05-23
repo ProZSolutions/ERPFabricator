@@ -9,8 +9,7 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
   const [showReadMore, setShowReadMore] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const navigation = useNavigation();
-  console.log("selectedTab"," as"+selectedTab);
-
+ 
 
   if (!item) return null;
 
@@ -34,10 +33,11 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
     console.log("details share ",JSON.stringify(item));
     if (item) {
       if(type==='activity'){
-      navigation.navigate('EditSchedule', { lead: item });
+        navigation.navigate('EditSchedule', { lead: item });
+      }else if(type==='schedule'){
+        navigation.navigate('EditActivity', { lead: item });
       }else{
-      navigation.navigate('EditActivity', { lead: item });
-  
+        navigation.navigate('AddNotes', { lead: item });
       }
     } else {
       Alert.alert('Please wait', 'Lead details are still loading.');
@@ -46,7 +46,7 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
 
 
   return (
-    <View className="flex-row bg-gray-100 rounded-2xl shadow-md p-3 mb-4 mx-2 items-start">
+    <View className="flex-row bg-white rounded-2xl shadow-md border border-gray-200 p-3 mb-4 mx-2 items-start">
       <View className="w-1.5 rounded-full bg-red-500 mr-3" />
       <View className="flex-1 space-y-2">
         <View className="flex-row items-center space-x-1">
@@ -128,7 +128,22 @@ export default function ActivityCard({ item, isExpanded, onToggle ,close,selecte
                 </TouchableOpacity>
               </View>
         )}
-         </View>
+
+
+            { (selectedTab === 'all' && item.activity_type === 'activity') && (
+              <View className="flex-row items-center space-x-2 pl-2">          
+
+                <TouchableOpacity onPress={() => handleNavigateToSchedule('notes')}>
+                  <View style={styles.iconCircle}>
+                    <MaterialIcons name="note-add" size={12} color="white" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+        )}
+
+
+
+          </View>
       </View>
     </View>
   );

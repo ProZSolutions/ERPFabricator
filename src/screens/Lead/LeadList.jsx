@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState,useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, Platform ,Image,ActivityIndicator,FlatList} from 'react-native';
 import { useNavigation } from '@react-navigation/native'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,6 +8,7 @@ import SearchInputBox from '../../component/SearchInputBox/SearchInputBox';
 import LeadRowItem from '../../screens/Lead/LeadRowItem';
 import { BASE_URL_TESTING } from '../../api/Config';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useFocusEffect } from '@react-navigation/native';
 
  
 import CustomHeader from '../../component/Header/CustomHeader';
@@ -119,7 +120,12 @@ const getTaskList = async (page = 1) => {
      }
   }, [token, deviceid]);
 
-  
+      useFocusEffect(
+    useCallback(() => {
+      // Your refresh logic here
+      getTaskList(1,{});
+    }, [token,deviceid])
+  );
  
   return (
     <View className="flex-1 bg-white">
@@ -133,6 +139,12 @@ const getTaskList = async (page = 1) => {
           <Text className="text-white text-[10px] mr-1"> Add</Text>
         </TouchableOpacity>
       </View>
+
+        {tasks.length === 0 && !loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
+          No list found
+        </Text>
+      ) : (
       <FlatList style={{marginTop:10,marginBottom:70}}
         data={tasks}
         keyExtractor={(item) => item.uuid}
@@ -151,7 +163,7 @@ const getTaskList = async (page = 1) => {
         }}
         onEndReachedThreshold={0.5}
       />
-
+   )}
         
 
       <CustomFooter isLead={true} />

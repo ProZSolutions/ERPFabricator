@@ -20,6 +20,7 @@ const CustomerDetails = ({ route }) => {
   const [modalDet,setModalDet] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [display,setDisplay]=useState(null);
   const navigation = useNavigation();
   
 
@@ -40,18 +41,14 @@ const CustomerDetails = ({ route }) => {
       setDeviceID(device_id);
       setToken(bearerToken);
 
-      console.log("customer device id:", device_id, "token:", bearerToken);
-
+ 
     } catch (error) {
-      console.error('Error fetching device ID:', error);
-    }
+     }
   };
 
   const getTaskList = async () => {
      const token_no = "Bearer " + token;
-     console.log("base "," url "+BASE_URL_TESTING);
-          console.log("uuid "," url "+lead?.uuid);
-
+ 
     setLoading(true);
 
     try {
@@ -66,25 +63,25 @@ const CustomerDetails = ({ route }) => {
       });
 
       const result = await response.json();
-      console.log("status ", "code " + result.status);
-
+ 
       if (response.status === 200 && result.status === 'success') {
 
         setTasks(result.lead_data?.data || []);
         setDetails(result.customer || {});
         setModalDet(result.customer || {});
       } else {
-        console.warn('Task list fetch failed:', result?.message || 'Unknown error');
-      }
+           Alert.alert('Error', result.message || 'Something went wrong.');
+       }
     } catch (error) {
-      console.error('Error fetching task list:', error);
-    } finally {
+         Alert.alert('Error', error);
+     } finally {
       setLoading(false);
     }
   };
   const handleViewDetails = (leadItem) => {
   setModalDet(leadItem);
   setShowModal(true);
+  setDisplay("Lead");
 };
 
 
@@ -120,7 +117,10 @@ const CustomerDetails = ({ route }) => {
       </View>
 
       <View className="flex-row flex-wrap gap-2 p-2">
-        <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-xl" onPress={() => setShowModal(true)}>
+        <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-xl" onPress={() => {
+        setShowModal(true);
+        setDisplay('Customer');
+      } }>
           <Text className="text-white text-[10px]">View Customer Details</Text>
         </TouchableOpacity>
         <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-xl" onPress={() => handleNavigateToSchedule('schedule')}>
@@ -133,7 +133,13 @@ const CustomerDetails = ({ route }) => {
 
   
 
-      <FlatList
+
+  {tasks.length === 0 && !loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
+          No list found
+        </Text>
+      ) : (    
+          <FlatList
         style={{ marginTop: 10, marginBottom: 70 }}
         data={tasks}
         keyExtractor={(item) => item.uuid}
@@ -150,8 +156,9 @@ const CustomerDetails = ({ route }) => {
                 ) : null}
       />
 
-      <ProductDetailsModal visible={showModal} onClose={() => setShowModal(false)} item={modalDet} />
-      <CustomFooter isLead={true} />
+   )}
+      <ProductDetailsModal visible={showModal} onClose={() => setShowModal(false)} item={modalDet} display={display} />
+      <CustomFooter isHome={true} />
     </View>
   );
 };

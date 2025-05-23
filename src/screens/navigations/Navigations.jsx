@@ -8,6 +8,7 @@ import SignUp from '../SignUp/SignUp';
 import LiveChit from '../LiveChit/LiveChit';
 import PendingList from '../PendingList/PendingList';
 import MembersList from '../MembersList/MembersList';
+import CameraAlone from '../MembersList/CameraAlone';
 import AddMembers from '../AddMembers/AddMembers';
 import ChitDetails from '../ChitDetails/ChitDetails';
 import AddChit from '../AddChit/AddChit';
@@ -55,6 +56,8 @@ import LeadDetails from '../Lead/LeadDetails';
 import ProfileDetails from '../Profile/ProfileDetails';
 import EditProfile from '../Profile/EditProfile';
 import {usePusher} from '../../usePusher';
+import AddNotes from '../../screens/Tasks/AddNotes';
+import UpdateAssigned from '../../screens/Tasks/UpdateAssigned';
 
 
 
@@ -87,6 +90,9 @@ function Navigations() {
  
                          <Stack.Screen name="Home" component={Home} />
                          <Stack.Screen name="ProfileDetails" component={ProfileDetails} />
+                         <Stack.Screen name="AddNotes" component={AddNotes} />
+                         <Stack.Screen name ="UpdateAssigned" component={UpdateAssigned} />
+                         <Stack.Screen name ="CameraAlone" component={CameraAlone} />
                          <Stack.Screen name="AddSchedule" component={AddSchedule} />
                          <Stack.Screen name="AddActivity" component={AddActivity} />
                          <Stack.Screen name="EditSchedule" component={EditSchedule} />

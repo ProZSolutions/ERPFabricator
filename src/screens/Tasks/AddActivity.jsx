@@ -102,7 +102,7 @@ function AddSchedule({ route }) {
     const validateForm = () => {
         const newErrors = {};
         if (!formValues.date) newErrors.date = 'Please select date.';
-         if (!formValues.stage) newErrors.stage = 'Please select status.';
+         if (!formValues.stage) newErrors.stage = 'Please select purpose.';
          if (!formValues.mode) newErrors.mode = 'Please select Mode of Communication.';
 
          setErrors(newErrors);
@@ -228,6 +228,9 @@ function AddSchedule({ route }) {
 
     useEffect(() => {
         console.log("details","as "+JSON.stringify(lead));
+         if (!formValues.date) {
+            handleValueChange("date", new Date());
+          }
         getCurrentLocation();
         const fetchUploadStatusOptions = async () => {
             try {
@@ -332,7 +335,7 @@ function AddSchedule({ route }) {
                         <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
                     </View>
                     <CustomDateTimePicker
-                        date={formValues.date}
+                        date={formValues.date || new Date()}
                         onChangeTxt={(value) => handleValueChange("date", value)}
                         placeholder="Select Date"
                         required={true}
@@ -416,11 +419,11 @@ function AddSchedule({ route }) {
 
                     {/* Buttons */}
                     <View className="flex-row justify-between mt-4">
-                        <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.navigate('TaskList')}>
+                        <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.goBack()}>
                             <Text className="text-white font-semibold text-sm">Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
-                            <Text className="text-white font-semibold text-sm">Add Activity</Text>
+                            <Text className="text-white font-semibold text-sm">Add Schedule</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

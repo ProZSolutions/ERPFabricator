@@ -33,10 +33,13 @@ function AddSchedule({ route }) {
       });
     const [mode, setMode] = useState(false);
     const [options, setOptions] = useState({ stage: [] });
+    const [noptions,setNOptions] = useState({next_stages_id:[]});
      const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
     const [modes, setModes] = useState([]);
     const [selectedMode, setSelectedMode] = useState(null); // Track selected mode
+        const [nselectedMode, setNSelectedMode] = useState(null); // Track selected mode
+
 
      const [expandedId, setExpandedId] = useState(null);
         const [tasks, setTasks] = useState([]);
@@ -52,6 +55,9 @@ function AddSchedule({ route }) {
     const [loadingUnits, setLoadingUnits] = useState(true);
     const [selectedUnit,setSelectedUnit]=useState(null);
     const [hasSetDefaultUnit, setHasSetDefaultUnit] = useState(false);
+    const [modeOptions,setModeOptions] = useState([]);
+      const [selectedOption, setSelectedOption] = useState('no');
+
  
 
  
@@ -75,7 +81,12 @@ function AddSchedule({ route }) {
         schedule_id:'',
         send_msg:'0',
         latitude:null,
-        longitude:null
+        longitude:null,
+        schedule_time:null,
+        next_notes:null,
+        next_stages_id:null,
+        next_mode_communication:null,
+        is_next_schedule:'0'
     });
 
     const [errors, setErrors] = useState({});
@@ -117,8 +128,7 @@ function AddSchedule({ route }) {
     const validateForm = () => {
         const newErrors = {};
         if (!formValues.date) newErrors.date = 'Please select date.';
-        if (!formValues.stage) newErrors.stage = 'Please select status.';
-
+        if (!formValues.stage) newErrors.stage = 'Please select Purpose.';
         if (!selectedMode) newErrors.mode = 'Please select a mode of communication.';
         if (!selectedInquiry) newErrors.inquiry = 'Please select an inquiry.';
         if (!selectedReply) newErrors.reply = 'Please select a reply.';
@@ -142,6 +152,16 @@ function AddSchedule({ route }) {
             }
          
         }
+
+        if(selectedOption==='yes'){
+            if (!formValues.schedule_time) newErrors.schedule_time = 'Please select Schedule date.';                    
+            if (!formValues.next_stages_id) newErrors.next_stages_id = 'Please select Schedule Purpose.';
+            if (!nselectedMode) newErrors.next_mode_communication = 'Please select a Schedule mode of communication.';
+
+        }
+
+
+
          setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -153,6 +173,12 @@ function AddSchedule({ route }) {
              return;
         }
 
+        let next_schedule="0";
+        if(selectedOption ==='yes'){
+            next_schedule="1";
+        }
+
+ 
         setLoading(true);
         try {
             const requestPayload = {
@@ -175,6 +201,11 @@ function AddSchedule({ route }) {
                 is_schedule: '1',
                 schedule_id: lead.uuid,
                 send_msg: checkboxStatus.toString(), // or 1/0 as string
+                  schedule_time: moment(formValues.schedule_time ? new Date(formValues.schedule_time) : new Date()).format("YYYY-MM-DD HH:mm:ss"),
+                next_notes:formValues.next_notes,
+                next_stages_id:formValues.next_stages_id,
+                next_mode_communication:nselectedMode?.id,
+                is_next_schedule:next_schedule
             };
 
              console.log(JSON.stringify(requestPayload, null, 2));
@@ -185,7 +216,7 @@ function AddSchedule({ route }) {
             if (response.status === "success") {
                 Alert.alert(
                     "Success",
-                    "Task Details Submitted Successfully!!!.",
+                    "Activity Details Submitted Successfully!!!.",
                     [{ text: "OK", onPress: () => navigation.goBack() }],
                     { cancelable: false }
                 );
@@ -279,6 +310,12 @@ function AddSchedule({ route }) {
 
     useEffect(() => {
         console.log("details","as "+JSON.stringify(lead));
+        if (!formValues.date) {
+            handleValueChange("date", new Date());
+          }
+            if (!formValues.schedule_time) {
+            handleValueChange("schedule_time", new Date());
+          }
         getCurrentLocation();
         const fetchUploadStatusOptions = async () => {
             try {
@@ -292,6 +329,8 @@ function AddSchedule({ route }) {
                             meta: { id: item.uuid },
                         }));
                     setOptions(prev => ({ ...prev, stage: formattedOptions }));
+                    setNOptions(prev => ({ ...prev, next_stages_id: formattedOptions }));
+
 
                     // Set default stage value after options are loaded
                     if (lead?.stages_id) {
@@ -320,6 +359,13 @@ function AddSchedule({ route }) {
                 if (response?.status === 'success' && Array.isArray(response.data)) {
                     const filteredModes = response.data.filter(item => item.name !== 'New');
                     setModes(filteredModes);
+
+                        const options = filteredModes.map(mode => ({
+                            label: mode.name,
+                            value: mode.id,
+                        }));
+                        setModeOptions(options);
+
                 }
             } catch (error) {
                 console.error('Error loading dropdown:', error);
@@ -409,39 +455,47 @@ function AddSchedule({ route }) {
                     {errors.stage && (
                         <Text className="text-red-500 font-normal text-[12px]">{errors.stage}</Text>
                     )}
-                    <View className="flex-row flex-wrap gap-2">
-                            {modes.map((item) => (
-                                <TouchableOpacity
-                                key={item.uuid}
-                                className={`border border-green-500 px-4 py-2 mb-2 rounded ${selectedMode?.uuid === item.uuid ? 'bg-green-100' : ''}`}
-                                onPress={() => {
-                                    setSelectedMode(item);
-                                    setMessurement(0);
-                                    setCheckboxStatus(0); // reset checkbox when selecting a new mode
-                                    setFormValues(prev => ({
-                                    ...prev,
-                                    file_url: '',
-                                    length: '',
-                                    width: '',
-                                    height: '',
-                                    unit: ''
-                                }));
 
-                            // Reset location
+
+
+                    <DropdownPickerBox
+                        label={
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <FontAwesome name="truck" size={13} color="#000" style={{ marginRight: 6 }} />
+                            <Text style={{ fontSize: 12, color: '#000' }}>Mode</Text>
+                            <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                            </View>
+                        }
+                        options={modeOptions}
+                        onValueChange={(id) => {
+                            const selected = modes.find(mode => mode.id === id);
+                            setSelectedMode(selected); // full object
+                            setMessurement(0);
+                            setCheckboxStatus(0);
+                            setFormValues(prev => ({
+                            ...prev,
+                            mode: id, // store id to send to server
+                            modeName: selected?.name || '', // optional, for display if needed
+                            file_url: '',
+                            length: '',
+                            width: '',
+                            height: '',
+                            unit: '',
+                            stage: prev.stage,
+                            }));
+
                             setSelectedLocation({ latitude: null, longitude: null });
                             getCurrentLocation();
-                                }}
+                        }}
+                        placeholder="Select Mode"
+                        value={formValues.mode} // this should be id, e.g. 5, 6 etc.
+                        />
 
-                                >
-                                <Text className="text-green-600 font-medium text-[12px]">
-                                    {item.name}
-                                </Text>
-                                </TouchableOpacity>
-                            ))}
-                     </View>
-                     {errors.mode  && (
-                        <Text className="text-red-500 font-normal text-[12px]">{errors.mode }</Text>
-                    )}
+                        {errors.mode && (
+                        <Text className="text-red-500 font-normal text-[12px]">{errors.mode}</Text>
+                        )}
+   
+                
                     <DropdownPickerBox
                         label={
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -569,7 +623,7 @@ function AddSchedule({ route }) {
  
 
 
-                 
+                 {/* 
                     {(selectedMode?.name === 'Direct' ) && (
 
                             <View className="p-4"> 
@@ -597,12 +651,124 @@ function AddSchedule({ route }) {
                         {errors.location      && (
                          <Text className="text-red-500 font-normal text-[12px]">{errors.location    }</Text>
                           )}
+                          */}
+
+
+
+
+                        {/*Next Schedule  */}
+                        <Text className="text-gray-800 font-normal text-[13px] mb-1">Next Schedule</Text>
+                          <View className="flex-row items-center mb-4">
+                                <TouchableOpacity
+                                onPress={() => setSelectedOption('yes')}
+                                className="flex-row items-center mr-6"
+                                >
+                                <View className={`w-4 h-4 rounded-full border border-gray-500 mr-2 ${selectedOption === 'yes' ? 'bg-blue-500' : ''}`} />
+                                <Text className="text-gray-500 font-normal text-[12px]">Yes</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                onPress={() => setSelectedOption('no')}
+                                className="flex-row items-center"
+                                >
+                                <View className={`w-4 h-4 rounded-full border border-gray-500 mr-2 ${selectedOption === 'no' ? 'bg-blue-500' : ''}`} />
+                                <Text className="text-gray-500 font-normal text-[12px]">No</Text>
+                                </TouchableOpacity>
+                            </View>
+
+
+
+
+                              {selectedOption === 'yes' && (
+                                    <View className="p-3 bg-gray-100 rounded-md">
+                                      <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 5 }}>
+                                        <FontAwesome name="calendar" size={13} color="#000" style={{ marginRight: 6 }} />
+                                        <Text style={{ color: '#000', fontSize: 12 }}> Date</Text>
+                                        <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                                    </View>
+                                    <CustomDateTimePicker
+                                        date={formValues.schedule_time}
+                                        onChangeTxt={(value) => handleValueChange("schedule_time", value)}
+                                        placeholder="Select Date"
+                                        required={true}
+                                        editable={true}
+                                        rightIcon={true}
+                                        errorMessage={errors.schedule_time}
+                                    />
+
+                                 <DropdownPickerBox
+                                    label={
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <FontAwesome name="spinner" size={13} color="#000" style={{ marginRight: 6 }} />
+                                            <Text style={{ fontSize: 12, color: '#000' }}>Purpose</Text>
+                                            <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                                        </View>
+                                    }
+                                    options={noptions.next_stages_id || []}
+                                    onValueChange={(value) => handleValueChange('next_stages_id', value)}
+                                    placeholder="Purpose"
+                                    value={formValues.next_stages_id}
+                                />
+                                {errors.next_stages_id && (
+                                    <Text className="text-red-500 font-normal text-[12px]">{errors.next_stages_id}</Text>
+                                )}
+
+
+
+                        <DropdownPickerBox
+                        label={
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <FontAwesome name="truck" size={13} color="#000" style={{ marginRight: 6 }} />
+                            <Text style={{ fontSize: 12, color: '#000' }}>Mode</Text>
+                            <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                            </View>
+                        }
+                        options={modeOptions}
+                        onValueChange={(id) => {
+                            const selected = modes.find(mode => mode.id === id);
+                            setNSelectedMode(selected); // full object
+                             setFormValues(prev => ({
+                            ...prev,
+                            next_mode_communication: id, // store id to send to server
+                            next_mode_communication_name: selected?.name || '', // optional, for display if needed
+                            stage: prev.stage,
+                            }));
+
+                        }}
+                        
+                        placeholder="Select Mode"
+                        value={formValues.next_mode_communication} // this should be id, e.g. 5, 6 etc.
+                        />
+
+                        {errors.next_mode_communication && (
+                        <Text className="text-red-500 font-normal text-[12px]">{errors.next_mode_communication}</Text>
+                        )}
+
+
+                        
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 5 }}>
+                        <FontAwesome name="file-text" size={13} color="#000" style={{ marginRight: 6 }} />
+                        <Text style={{ color: '#000', fontSize: 12 }}> Notes </Text>
+                     </View>
+                    <TextInputBox
+                         placeholder="Notes"
+                        value={formValues.notes}
+                        onChangeText={(text) => handleValueChange('next_notes', text)}
+                        errorMessage={errors.details}
+                        multiline={true}
+                        numberOfLines={5}
+                        textAlignVertical="top"
+                    />
+   
+                                    </View>
+                              )}
+
 
                      
 
                     {/* Buttons */}
                     <View className="flex-row justify-between mt-4">
-                        <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.navigate('TaskList')}>
+                        <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.goBack()}>
                             <Text className="text-white font-semibold text-sm">Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>

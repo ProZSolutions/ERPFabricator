@@ -15,8 +15,11 @@ package="com.ProZSolutions.erp">
 
       <uses-permission android:name="android.permission.CAMERA" />
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-      <uses-feature android:name="android.hardware.camera" />
-      <uses-feature android:name="android.hardware.camera.front" android:required="true"/>
+ 
+    <!--  <uses-feature android:name="android.hardware.camera" android:required="true"/>
+    <uses-feature android:name="android.hardware.camera.front" android:required="true"/>
+      <meta-data android:name="android.hardware.camera2.full" android:value="true" />  --> 
+
       <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
       <uses-permission android:minSdkVersion="34" android:name="android.permission.USE_EXACT_ALARM" />
@@ -27,6 +30,10 @@ package="com.ProZSolutions.erp">
       <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
       <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
 
  

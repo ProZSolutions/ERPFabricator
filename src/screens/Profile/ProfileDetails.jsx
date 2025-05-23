@@ -149,7 +149,9 @@ export default function ProfileScreen() {
       
            if (res.data.status === 'success') {
              setProfileData(res.data.data); // <-- set only the profile object
-          }
+           }else{
+            
+           }
         } catch (err) {
             console.log("error "," as "+err);
          }finally{
@@ -232,7 +234,7 @@ export default function ProfileScreen() {
          </View>
       </ScrollView>
 
-      <CustomFooter />
+      <CustomFooter  isHome={true}/>
     </View>
   );
 }

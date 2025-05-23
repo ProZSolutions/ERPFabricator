@@ -92,7 +92,9 @@ const getDeviceId = async () => {
       };
       const handleLogoutAndRedirect = async () => {
   try {
-    await AsyncStorage.clear();
+   // await AsyncStorage.clear();
+   await AsyncStorage.removeItem('userInfohrms');
+    await AsyncStorage.removeItem('userInfo');
     logout(); 
   } catch (e) {
     console.error("Error clearing AsyncStorage", e);
@@ -143,10 +145,14 @@ const getTaskList = async () => {
           },
         ]);
       } else {
-         
+         Alert.alert("Failed",result?.message || result?.error || 'Failed to update password');
       }
     } catch (error) {
-      console.error("Error fetching task list", error);
+      if (error?.response?.data?.status === "error") {
+                Alert.alert("Error", error?.response?.data?.error || "An error occurred.");
+            } else {
+                await handleError(error, false);
+            }
     } finally {
       setLoading(false);
     }
@@ -250,7 +256,7 @@ const getTaskList = async () => {
  
         </View>
       </Container>
-      <CustomFooter isTask={true} />
+      <CustomFooter isHome={true} />
     </View>
   );
 }

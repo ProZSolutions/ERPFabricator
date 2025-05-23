@@ -3,7 +3,7 @@ import { View, Text, Modal, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function ProductDetailsModal({ visible, onClose ,item }) {
-    console.log(" lead name ","as "+item);
+    console.log(" lead name ","as "+JSON.stringify(item));
       if (!item) return null; // or a loading spinner if needed
 
   return (
@@ -71,6 +71,30 @@ export default function ProductDetailsModal({ visible, onClose ,item }) {
             <View className="ml-2">
                 <Text className="text-gray-700 text-[10px]">Length :</Text>
                 <Text className="text-gray-700 text-[10px]">{item.length}</Text>
+            </View>
+          </View>
+
+  <View className="w-1/2 flex-row items-start mt-2">
+        <View className="p-1 rounded-full bg-gray-200 p-1">
+                    <Icon name="package" size={16} color="blue" className="mt-1" />
+
+        </View>
+        <View className="ml-2">
+            <Text className="text-gray-700 text-[10px]">Lead Purpose :</Text>
+            <Text className="text-gray-700 text-[10px]">{item.lead_purpose_name}</Text>
+        </View>
+        </View>
+
+
+
+          <View className="w-1/2 flex-row items-start mt-2">
+                  <View className="p-1 rounded-full bg-gray-200 p-1">
+                              <Icon name="layers" size={16} color="blue" className="mt-1" />
+
+                    </View>
+            <View className="ml-2">
+                <Text className="text-gray-700 text-[10px]">Material Details :</Text>
+                <Text className="text-gray-700 text-[10px]">{item.material_details_name}</Text>
             </View>
           </View>
 

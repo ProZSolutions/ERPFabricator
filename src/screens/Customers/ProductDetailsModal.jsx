@@ -2,9 +2,8 @@ import React from "react";
 import { View, Text, Modal, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-export default function ProductDetailsModal({ visible, onClose, item }) {
-  console.log("Lead details: ", item);
-  if (!item) return null; // or a loading spinner if needed
+export default function ProductDetailsModal({ visible, onClose, item,display }) {
+   if (!item) return null; // or a loading spinner if needed
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -12,12 +11,12 @@ export default function ProductDetailsModal({ visible, onClose, item }) {
         <View className="bg-white rounded-2xl w-11/12 p-4">
           {/* Header */}
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-lg font-semibold text-gray-700">Lead Details</Text>
+            <Text className="text-lg font-semibold text-gray-700">{display} Details</Text>
           </View>
 
           {/* Product Name */}
           <View className="bg-gray-200 p-3 rounded-lg mb-4">
-            <Text className="text-gray-700 font-medium">Lead Name: {item?.name || item?.lead_name || '-'}
+            <Text className="text-gray-700 font-medium">{display} Name: {item?.name || item?.lead_name || '-'}
 </Text>
           </View>
 
@@ -66,7 +65,7 @@ export default function ProductDetailsModal({ visible, onClose, item }) {
                 </View>
                 <View className="ml-2 flex-1">
                   <Text className="text-gray-700 text-[10px]">District:</Text>
-                  <Text className="text-gray-700 text-[10px]">{item.district  || '-'}</Text>
+                  <Text className="text-gray-700 text-[10px]">{item.district_name  || '-'}</Text>
                 </View>
               </View>
             </View>
@@ -101,7 +100,7 @@ export default function ProductDetailsModal({ visible, onClose, item }) {
                   <Icon name="phone" size={16} color="blue" className="mt-1" />
                 </View>
                 <View className="ml-2 flex-1">
-                  <Text className="text-gray-700 text-[10px]">Lead Contact:</Text>
+                  <Text className="text-gray-700 text-[10px]">{display} Contact:</Text>
                   <Text className="text-gray-700 text-[10px]">{item.contact  || '-'}</Text>
                 </View>
               </View>
@@ -131,39 +130,11 @@ export default function ProductDetailsModal({ visible, onClose, item }) {
 
 
 
-              <View className="w-1/2 flex-row items-start   flex-wrap">
-                <View className="p-1 rounded-full bg-gray-200">
-                  <Icon name="note" size={16} color="blue" className="mt-1" />
-                </View>
-                <View className="ml-2 flex-1">
-                  <Text className="text-gray-700 text-[10px]">Notes:</Text>
-                  <Text className="text-gray-700 text-[10px]">{item.notes  || '-'}</Text>
-                </View>
-              </View>
+               
             </View>
 
             {/* Eighth row: Overdue Days and Stage Name */}
-            <View className="flex-row w-full justify-between">
-              <View className="w-1/2 flex-row items-start ">
-                <View className="p-1 rounded-full bg-gray-200">
-                  <Icon name="timer" size={16} color="red" className="mt-1" />
-                </View>
-                <View className="ml-2 flex-1">
-                  <Text className="text-gray-700 text-[10px]">Overdue Days:</Text>
-                  <Text className="text-gray-700 text-[10px]">{item.overdue_days  || '0'}</Text>
-                </View>
-              </View>
-
-              <View className="w-1/2 flex-row items-start ">
-                <View className="p-1 rounded-full bg-gray-200">
-                  <Icon name="clipboard-text" size={16} color="blue" className="mt-1" />
-                </View>
-                <View className="ml-2 flex-1">
-                  <Text className="text-gray-700 text-[10px]">Stage Name:</Text>
-                  <Text className="text-gray-700 text-[10px]">{item.stage_name  || '-'}</Text>
-                </View>
-              </View>
-            </View>
+        
           </View>
 
           {/* Close Button */}

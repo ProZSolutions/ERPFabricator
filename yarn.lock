@@ -6665,7 +6665,7 @@ react-native-heroicons@^4.0.0:
   resolved "https://registry.npmjs.org/react-native-heroicons/-/react-native-heroicons-4.0.0.tgz"
   integrity sha512-RY3XhAr0aQxLtWUkIUifTUBYC3tOspe0pMTHTATpQYyg6Uw7PYO5qmHYFul9w8tvYAB43WDRZ+yomdVmMQ2Jqw==
 
-react-native-image-picker@^7.1.2:
+react-native-image-picker@^7.2.3:
   version "7.2.3"
   resolved "https://registry.npmjs.org/react-native-image-picker/-/react-native-image-picker-7.2.3.tgz"
   integrity sha512-zKIZUlQNU3EtqizsXSH92zPeve4vpUrsqHu2kkpCxWE9TZhJFZBb+irDsBOY8J21k0+Edgt06TMQGJ+iPUIXyA==
@@ -6711,6 +6711,11 @@ react-native-otp-entry@^1.7.2:
   version "1.8.4"
   resolved "https://registry.npmjs.org/react-native-otp-entry/-/react-native-otp-entry-1.8.4.tgz"
   integrity sha512-7j7p/ZEz5QlS22DWYoFigbLqLDSwFbwTVlsl2QOuW6q9Jwai+y5C2GSdKZRkY7RAy0ZwG/ltkaciSdnoBNdcwQ==
+
+react-native-permissions@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.npmjs.org/react-native-permissions/-/react-native-permissions-5.4.0.tgz"
+  integrity sha512-D+YOIss+aKXi/VuZvm7hAq4WSugYyif58AIAWsT2/uLh9pz9ukOttGzPttjrv617J3bOEnt7C6cJBWoXmj/QRw==
 
 react-native-picker-select@^9.3.1:
   version "9.3.1"
@@ -6811,6 +6816,11 @@ react-native-vector-icons@^10.2.0:
   dependencies:
     prop-types "^15.7.2"
     yargs "^16.1.1"
+
+react-native-vision-camera@^4.6.4:
+  version "4.6.4"
+  resolved "https://registry.npmjs.org/react-native-vision-camera/-/react-native-vision-camera-4.6.4.tgz"
+  integrity sha512-d998uTHsGJ9bTlsClgT37RK1sK7ZQekv5y6ylynds3vmdK6YbFQJUoi2cvMrFN4dp9qvSlCjEfwekjMIz3guQA==
 
 react-native@0.75.3:
   version "0.75.3"

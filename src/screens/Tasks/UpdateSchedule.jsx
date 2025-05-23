@@ -29,6 +29,13 @@ function AddSettlement({ route }) {
         latitude: 11.2284893,
         longitude: 78.1450853,
       });
+              const [selectedOption, setSelectedOption] = useState('no');
+      
+              const [nselectedMode, setNSelectedMode] = useState(null); // Track selected mode
+          const [noptions,setNOptions] = useState({next_stages_id:[]});
+      
+            const [modeOptions,setModeOptions] = useState([]);
+      
     const [mode, setMode] = useState(false);
     const [options, setOptions] = useState({ stage: [] });
     const { details } = route.params || {};
@@ -75,7 +82,12 @@ function AddSettlement({ route }) {
         schedule_id:'',
         send_msg:'0',
         latitude:null,
-        longitude:null
+        longitude:null,
+          schedule_time:null,
+        next_notes:null,
+        next_stages_id:null,
+        next_mode_communication:null,
+        is_next_schedule:'0'
     });
 
     const [errors, setErrors] = useState({});
@@ -95,7 +107,12 @@ function AddSettlement({ route }) {
             }));
 
             if (Array.isArray(details.activity)) {
-                setTasks(details.activity); // set the array directly
+                const tasksWithOrder = details.activity.map((item, index) => ({
+                            ...item,
+                            order_id: index + 1, // start from 1
+                }));
+
+                setTasks(tasksWithOrder); // set the array directly
               } else {
                 console.warn("task_update is null or not an array");
                 setTasks([]);
@@ -164,6 +181,13 @@ function AddSettlement({ route }) {
             }
          
         }
+        
+         if(selectedOption==='yes'){
+            if (!formValues.schedule_time) newErrors.schedule_time = 'Please select Schedule date.';                    
+            if (!formValues.next_stages_id) newErrors.next_stages_id = 'Please select Schedule Purpose.';
+            if (!nselectedMode) newErrors.next_mode_communication = 'Please select a Schedule mode of communication.';
+
+        }
          setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -174,6 +198,11 @@ function AddSettlement({ route }) {
         if (!validateForm()) {
              return;
         }
+               let next_schedule="0";
+        if(selectedOption ==='yes'){
+            next_schedule="1";
+        }
+
 
         setLoading(true);
         try {
@@ -197,6 +226,11 @@ function AddSettlement({ route }) {
                 is_schedule: '1',
                 schedule_id: details.uuid,
                 send_msg: checkboxStatus.toString(), // or 1/0 as string
+                   schedule_time: moment(formValues.schedule_time ? new Date(formValues.schedule_time) : new Date()).format("YYYY-MM-DD HH:mm:ss"),
+                                                next_notes:formValues.next_notes,
+                                                next_stages_id:formValues.next_stages_id,
+                                                next_mode_communication:nselectedMode?.id,
+                                                is_next_schedule:next_schedule
             };
 
              console.log(JSON.stringify(requestPayload, null, 2));
@@ -313,6 +347,7 @@ function AddSettlement({ route }) {
                             meta: { id: item.uuid },
                         }));
                     setOptions(prev => ({ ...prev, stage: formattedOptions }));
+                    setNOptions(prev => ({ ...prev, next_stages_id: formattedOptions }));
 
                     // Set default stage value after options are loaded
                     if (details?.stages_id) {
@@ -341,6 +376,11 @@ function AddSettlement({ route }) {
                 if (response?.status === 'success' && Array.isArray(response.data)) {
                     const filteredModes = response.data.filter(item => item.name !== 'New');
                     setModes(filteredModes);
+                     const options = filteredModes.map(mode => ({
+                            label: mode.name,
+                            value: mode.id,
+                        }));
+                        setModeOptions(options);
                 }
             } catch (error) {
                 console.error('Error loading dropdown:', error);
@@ -430,39 +470,46 @@ function AddSettlement({ route }) {
                     {errors.stage && (
                         <Text className="text-red-500 font-normal text-[12px]">{errors.stage}</Text>
                     )}
-                    <View className="flex-row flex-wrap gap-2">
-                            {modes.map((item) => (
-                                <TouchableOpacity
-                                key={item.uuid}
-                                className={`border border-green-500 px-4 py-2 mb-2 rounded ${selectedMode?.uuid === item.uuid ? 'bg-green-100' : ''}`}
-                                onPress={() => {
-                                    setSelectedMode(item);
-                                    setMessurement(0);
-                                    setCheckboxStatus(0); // reset checkbox when selecting a new mode
-                                    setFormValues(prev => ({
-                                    ...prev,
-                                    file_url: '',
-                                    length: '',
-                                    width: '',
-                                    height: '',
-                                    unit: ''
-                                }));
 
-                            // Reset location
-                            setSelectedLocation({ latitude: null, longitude: null });
-                            getCurrentLocation();
-                                }}
 
-                                >
-                                <Text className="text-green-600 font-medium text-[12px]">
-                                    {item.name}
-                                </Text>
-                                </TouchableOpacity>
-                            ))}
-                     </View>
-                     {errors.mode  && (
-                        <Text className="text-red-500 font-normal text-[12px]">{errors.mode }</Text>
-                    )}
+
+                                    <DropdownPickerBox
+                                             label={
+                                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                 <FontAwesome name="truck" size={13} color="#000" style={{ marginRight: 6 }} />
+                                                 <Text style={{ fontSize: 12, color: '#000' }}>Mode</Text>
+                                                 <Text style={{ color: 'red', marginLeft: 3 }}>*</Text>
+                                                 </View>
+                                             }
+                                             options={modeOptions}
+                                             onValueChange={(id) => {
+                                                 const selected = modes.find(mode => mode.id === id);
+                                                 setSelectedMode(selected); // full object
+                                                 setMessurement(0);
+                                                 setCheckboxStatus(0);
+                                                 setFormValues(prev => ({
+                                                 ...prev,
+                                                 mode: id, // store id to send to server
+                                                 modeName: selected?.name || '', // optional, for display if needed
+                                                 file_url: '',
+                                                 length: '',
+                                                 width: '',
+                                                 height: '',
+                                                 unit: '',
+                                                  })); 
+                                             }}
+                                             placeholder="Select Mode"
+                                             value={formValues.mode} // this should be id, e.g. 5, 6 etc.
+                                             />
+                     
+                                             {errors.mode && (
+                                             <Text className="text-red-500 font-normal text-[12px]">{errors.mode}</Text>
+                                             )}
+
+
+
+
+                 
                     <DropdownPickerBox
                         label={
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -590,7 +637,7 @@ function AddSettlement({ route }) {
  
 
 
-                 
+                 {/* 
                     {(selectedMode?.name === 'Direct' ) && (
 
                             <View className="p-4"> 
@@ -618,16 +665,15 @@ function AddSettlement({ route }) {
                         {errors.location      && (
                          <Text className="text-red-500 font-normal text-[12px]">{errors.location    }</Text>
                           )}
-
-                     
-
+                    */}
                     {/* Buttons */}
+                    
                     <View className="flex-row justify-between mt-4">
                         <TouchableOpacity className="bg-gray-400 px-6 py-2 rounded-md" onPress={() => navigation.navigate('TaskList')}>
                             <Text className="text-white font-semibold text-sm">Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
-                            <Text className="text-white font-semibold text-sm">Add Activity</Text>
+                            <Text className="text-white font-semibold text-sm">Add Schedule</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -637,13 +683,13 @@ function AddSettlement({ route }) {
                                                   
                        <FlatList
                             data={tasks}
-                            keyExtractor={(item) => item.id}
+                            keyExtractor={(item) => item.order_id}
                             contentContainerStyle={{ padding: 16 }}
                              renderItem={({ item }) => (
                                     <ScheduleRowItem
                                           item={item}
-                                          isExpanded={expandedId === item.id}
-                                           onPress={() => handlePress(item.id)}
+                                          isExpanded={expandedId === item.order_id}
+                                           onPress={() => handlePress(item.order_id)}
                                           />
                                            )}
                                                     />

@@ -68,6 +68,7 @@ function CallHIstory() {
       }
     } catch (error) {
       console.error("Error fetching task list", error);
+        Alert.alert('Error', error);
     } finally {
       setLoading(false);
     }
@@ -104,22 +105,27 @@ function CallHIstory() {
         onChangeText={handleInputSearchChange}
         onPress={openSearchModal}
       />
-
-      <FlatList
-        style={{ marginTop: 10, marginBottom: 70 }}
-        data={tasks}
-        keyExtractor={(item) => item.uuid}
-        renderItem={({ item }) => <CallHistoryRow details={item} />}
-        ListFooterComponent={loading ? (
-          <ActivityIndicator size="small" color="#0000ff" style={{ marginVertical: 8 }} />
-        ) : null}
-        onEndReached={() => {
-          if (!loading && currentPage < lastPage) {
-            getTaskList(currentPage + 1);
-          }
-        }}
-        onEndReachedThreshold={0.5}
-      />
+      {tasks.length === 0 && !loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
+          No list found
+        </Text>
+      ) : (
+            <FlatList
+              style={{ marginTop: 10, marginBottom: 70 }}
+              data={tasks}
+              keyExtractor={(item) => item.uuid}
+              renderItem={({ item }) => <CallHistoryRow details={item} />}
+              ListFooterComponent={loading ? (
+                <ActivityIndicator size="small" color="#0000ff" style={{ marginVertical: 8 }} />
+              ) : null}
+              onEndReached={() => {
+                if (!loading && currentPage < lastPage) {
+                  getTaskList(currentPage + 1);
+                }
+              }}
+              onEndReachedThreshold={0.5}
+            />
+      )}
 
       <SearchModal
         visible={isModalVisible}

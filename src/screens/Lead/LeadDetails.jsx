@@ -25,9 +25,7 @@ const LeadDetailsScreen = ({ route }) => {
   const [expandedId, setExpandedId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-   
-
-
+  
   const handleToggle = (uuid) => {
     setExpandedId(prev => (prev === uuid ? null : uuid));
   };
@@ -60,9 +58,8 @@ const LeadDetailsScreen = ({ route }) => {
   const getTaskList = async () => {
     const token_no = "Bearer " + token;
     setLoading(true);
-
-    try {
-      const url = `${BASE_URL_TESTING}leads-view?uuid=${lead?.uuid}`;
+     try {
+       const url = `${BASE_URL_TESTING}leads-view?uuid=${lead?.uuid}`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -133,15 +130,16 @@ const LeadDetailsScreen = ({ route }) => {
       </View>
 
       <View className="flex-row flex-wrap gap-2 p-2">
-        <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-xl"   onPress={() => setShowModal(true)}
+        <TouchableOpacity className="bg-blue-600 px-3 py-2 rounded-xl"   onPress={() => setShowModal(true)}
 >
           <Text className="text-white text-[10px]">View Product Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-xl"  onPress={() => handleNavigateToSchedule('schedule')}
+        <TouchableOpacity className="bg-blue-600 px-3 py-2 rounded-xl flex-row items-center"  onPress={() => handleNavigateToSchedule('schedule')}
 >
-          <Text className="text-white text-[10px]">Schedule</Text>
+          <FontAwesome name="plus" size={10} color="#FFFFFF" />
+          <Text className="text-white text-[10px] ml-1">Schedule</Text>
         </TouchableOpacity>
-        <Pressable className="bg-blue-600 px-4 py-2 rounded-xl">
+        <Pressable className="bg-blue-600 px-3 py-2 rounded-xl">
           <Text className="text-white text-[10px]">Go to Project</Text>
         </Pressable>
       </View>
@@ -178,6 +176,11 @@ const LeadDetailsScreen = ({ route }) => {
         </TouchableOpacity>
       </View>
 
+  {tasks.length === 0 && !loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
+          No list found
+        </Text>
+      ) : (
       <FlatList
         style={{ marginTop: 10, marginBottom: 70 }}
         data={dataToShow}
@@ -192,7 +195,7 @@ const LeadDetailsScreen = ({ route }) => {
           />
         )}
       />
-
+   )}
       {selectedTab === 'all' && tasks.length === 0 && (
         <Text style={{ textAlign: 'center' }}>No activity found.</Text>
       )}

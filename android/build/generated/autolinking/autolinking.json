@@ -389,6 +389,31 @@
         }
       }
     },
+    "react-native-permissions": {
+      "root": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-permissions",
+      "name": "react-native-permissions",
+      "platforms": {
+        "ios": {
+          "podspecPath": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-permissions\\RNPermissions.podspec",
+          "version": "5.4.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-permissions\\android",
+          "packageImportPath": "import com.zoontek.rnpermissions.RNPermissionsPackage;",
+          "packageInstance": "new RNPermissionsPackage()",
+          "buildTypes": [],
+          "libraryName": "RNPermissionsSpec",
+          "componentDescriptors": [],
+          "cmakeListsPath": "D:/React_Native/ERPFabricator/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-push-notification": {
       "root": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-push-notification",
       "name": "react-native-push-notification",
@@ -617,6 +642,30 @@
           "libraryName": "RNVectorIconsSpec",
           "componentDescriptors": [],
           "cmakeListsPath": "D:/React_Native/ERPFabricator/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-vision-camera": {
+      "root": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-vision-camera",
+      "name": "react-native-vision-camera",
+      "platforms": {
+        "ios": {
+          "podspecPath": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-vision-camera\\VisionCamera.podspec",
+          "version": "4.6.4",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "D:\\React_Native\\ERPFabricator\\node_modules\\react-native-vision-camera\\android",
+          "packageImportPath": "import com.mrousavy.camera.react.CameraPackage;",
+          "packageInstance": "new CameraPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "D:/React_Native/ERPFabricator/node_modules/react-native-vision-camera/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,

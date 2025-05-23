@@ -238,7 +238,7 @@ const parsedDate = new Date(formValues.date);
 
   return (
     <View className="flex-1 bg-white">
-      <CustomHeader name={" Edit  Schedule "} isBackIcon />
+      <CustomHeader name={"Reschedule "} isBackIcon />
       <Container paddingBottom={110}>
         <View style={{ marginTop: -15 }}>
           <Spinner visible={loading} textContent="Loading..." />
@@ -334,7 +334,7 @@ const parsedDate = new Date(formValues.date);
               <Text className="text-white font-semibold text-sm">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity className="bg-blue-600 px-6 py-2 rounded-md" onPress={handleSubmit}>
-              <Text className="text-white font-semibold text-sm">Update Schedule</Text>
+              <Text className="text-white font-semibold text-sm">Reschedule</Text>
             </TouchableOpacity>
           </View>
         </View>
